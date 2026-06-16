@@ -1,4 +1,4 @@
-# Codex Plugin Marketplace
+# Codex Plugins
 
 Personal Codex plugin marketplace.
 
@@ -11,8 +11,8 @@ Personal Codex plugin marketplace.
 After this repository is pushed to GitHub, users can add the marketplace and install the plugin:
 
 ```bash
-codex plugin marketplace add owner/repo
-codex plugin add explanatory-output-style@zaunekko-codex-plugins
+codex plugin marketplace add ZaunEkko/codex-plugins
+codex plugin add explanatory-output-style@zaunekko
 ```
 
 Because this plugin uses a `SessionStart` hook, Codex will ask each user to review and trust the hook once in `/hooks`.
