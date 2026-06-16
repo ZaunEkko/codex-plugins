@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${PLUGIN_ROOT}/hooks/session_start.py\"",
+            "commandWindows": "python \"%PLUGIN_ROOT%\\hooks\\session_start.py\"",
+            "statusMessage": "Loading explanatory output style"
+          }
+        ]
+      }
+    ]
+  }
+}
