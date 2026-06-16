@@ -1,0 +1,20 @@
+{
+  "name": "zaunekko-codex-plugins",
+  "interface": {
+    "displayName": "ZaunEkko Codex Plugins"
+  },
+  "plugins": [
+    {
+      "name": "explanatory-output-style",
+      "source": {
+        "source": "local",
+        "path": "./plugins/explanatory-output-style"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
