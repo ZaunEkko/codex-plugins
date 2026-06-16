@@ -7,7 +7,7 @@
           {
             "type": "command",
             "command": "python3 \"${PLUGIN_ROOT}/hooks/session_start.py\"",
-            "commandWindows": "python \"%PLUGIN_ROOT%\\hooks\\session_start.py\"",
+            "commandWindows": "python \"$env:PLUGIN_ROOT\\hooks\\session_start.py\"",
             "statusMessage": "Enabling explanatory-output-style"
           }
         ]

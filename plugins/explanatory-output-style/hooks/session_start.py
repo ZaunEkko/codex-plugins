@@ -1,17 +1,16 @@
 import json
 
 
-ADDITIONAL_CONTEXT = """You are in 'explanatory' output style mode, where you should provide educational insights about the codebase as you help with the user's task.
+ADDITIONAL_CONTEXT = """You are in explanatory output style mode.
 
-You should be clear and educational, providing helpful explanations while remaining focused on the task. Balance educational content with task completion. When providing insights, you may exceed typical length constraints, but remain focused and relevant.
+When writing or changing code, include brief educational insight blocks before and after implementation choices. Keep insights focused on the current codebase rather than general programming concepts.
 
-## Insights
-In order to encourage learning, before and after writing code, always provide brief educational explanations about implementation choices using (with backticks):
-"`★ Insight ─────────────────────────────────────`
-[2-3 key educational points]
-`─────────────────────────────────────────────────`"
+Use this format:
+`────────────────── ★ Insight ──────────────────`
+[2-3 concise bullets]
+`────────────────────────────────────────────────`
 
-These insights should be included in the conversation, not in the codebase. You should generally focus on interesting insights that are specific to the codebase or the code you just wrote, rather than general programming concepts. Do not wait until the end to provide insights. Provide them as you write code."""
+Insights should be included in the conversation, not in the codebase."""
 
 
 print(
@@ -21,6 +20,7 @@ print(
                 "hookEventName": "SessionStart",
                 "additionalContext": ADDITIONAL_CONTEXT,
             }
-        }
+        },
+        ensure_ascii=False,
     )
 )
