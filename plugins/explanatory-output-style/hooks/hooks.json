@@ -7,7 +7,7 @@
           {
             "type": "command",
             "command": "python3 \"${PLUGIN_ROOT}/hooks/session_start.py\"",
-            "commandWindows": "python \"$env:PLUGIN_ROOT\\hooks\\session_start.py\"",
+            "commandWindows": "python -c \"import os, runpy; runpy.run_path(os.path.join(os.environ['PLUGIN_ROOT'], 'hooks', 'session_start.py'), run_name='__main__')\"",
             "statusMessage": "Enabling explanatory-output-style"
           }
         ]

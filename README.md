@@ -179,6 +179,9 @@ python -m py_compile plugins/explanatory-output-style/hooks/session_start.py
 
 # 直接查看 hook 输出
 python plugins/explanatory-output-style/hooks/session_start.py
+
+# 运行插件行为测试
+python -m unittest tests.test_explanatory_output_style
 ```
 
 ---
