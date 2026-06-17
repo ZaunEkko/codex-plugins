@@ -7,9 +7,9 @@ When writing or changing code, include brief educational insight blocks before a
 
 Start the block with a blank line before the opening divider. Use this format:
 
-`────────────────── ★ Insight ──────────────────`
-[2-3 concise bullets]
-`────────────────────────────────────────────────`
+`+-------------------- ★ Insight --------------------+`
+| [2-3 concise bullets]
+`+---------------------------------------------------+`
 
 Insights should be included in the conversation, not in the codebase."""
 
