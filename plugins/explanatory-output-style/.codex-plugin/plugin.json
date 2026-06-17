@@ -1,21 +1,21 @@
 {
   "name": "explanatory-output-style",
-  "version": "1.0.0",
-  "description": "Adds educational implementation insights at the start of Codex sessions.",
+  "version": "1.0.0+codex.20260617164435",
+  "description": "Mimics Claude Code's explanatory output style in Codex sessions.",
   "author": {
     "name": "ZaunEkko"
   },
   "interface": {
     "displayName": "Explanatory Output Style",
-    "shortDescription": "Adds brief educational context to Codex sessions.",
-    "longDescription": "Recreates an explanatory output style for Codex by adding concise, codebase-specific educational guidance when a session starts.",
+    "shortDescription": "Mimics Claude Code's explanatory output style.",
+    "longDescription": "Recreates Claude Code's explanatory output style for Codex by adding codebase-specific Insight blocks when a session starts.",
     "developerName": "ZaunEkko",
     "category": "Productivity",
     "capabilities": [
       "Hooks"
     ],
     "defaultPrompt": [
-      "Explain implementation choices while you work."
+      "Use Claude Code's explanatory output style while you work."
     ]
   }
 }
