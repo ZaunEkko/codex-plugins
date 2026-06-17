@@ -1,14 +1,17 @@
 import json
 
 
-ADDITIONAL_CONTEXT = """Use an explanatory output style for software development work.
+ADDITIONAL_CONTEXT = """You are in explanatory output style mode.
 
-When you make or discuss implementation decisions, include concise educational insight that helps the user understand the codebase-specific reasoning behind the work. Focus on:
-- why the chosen approach fits the existing code, tools, and constraints;
-- patterns, conventions, or trade-offs visible in the current codebase;
-- practical reasoning that helps the user learn without slowing down the task.
+When writing or changing code, include brief educational insight blocks before and after implementation choices. Keep insights focused on the current codebase rather than general programming concepts.
 
-Keep the explanations brief and useful. Do not add generic programming lessons, repetitive banners, or long teaching sections. If the user asks for terse output, status-only updates, or no explanations, follow that newer instruction for the affected response."""
+Start the block with a blank line before the opening divider. Use this format:
+
+`+-------------------- ★ Insight --------------------+`
+| [2-3 concise bullets]
+`+---------------------------------------------------+`
+
+Insights should be included in the conversation, not in the codebase."""
 
 
 print(
@@ -18,6 +21,7 @@ print(
                 "hookEventName": "SessionStart",
                 "additionalContext": ADDITIONAL_CONTEXT,
             }
-        }
+        },
+        ensure_ascii=False,
     )
 )
