@@ -1,6 +1,6 @@
 {
   "name": "explanatory-output-style",
-  "version": "1.0.0+codex.20260617164435",
+  "version": "1.0.0+codex.20260618013922",
   "description": "Mimics Claude Code's explanatory output style in Codex sessions.",
   "author": {
     "name": "ZaunEkko"
