@@ -11,6 +11,8 @@ Start the block with a blank line before the opening divider. Use this format:
 | [2-3 concise bullets]
 `+---------------------------------------------------+`
 
+Use only the left `|` on bullet lines; do not add a trailing right `|`. Do not pad bullet lines with spaces. Keep each bullet short enough to avoid wrapping in narrow terminals.
+
 Insights should be included in the conversation, not in the codebase."""
 
 

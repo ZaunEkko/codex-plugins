@@ -42,7 +42,7 @@ class ExplanatoryOutputStyleTests(unittest.TestCase):
         )
         return json.loads(result.stdout)
 
-    def test_insight_block_uses_ascii_box_with_star_in_top_border(self):
+    def test_insight_block_uses_left_border_only_to_avoid_wrapping_artifacts(self):
         context = self.hook_context()
         opening_line = "`+-------------------- ★ Insight --------------------+`"
         closing_line = "`+---------------------------------------------------+`"
@@ -53,6 +53,7 @@ class ExplanatoryOutputStyleTests(unittest.TestCase):
         self.assertIn(bullet_placeholder_line, context)
         self.assertIn("\n\n" + opening_line, context)
         self.assertIn("Start the block with a blank line before the opening divider.", context)
+        self.assertIn("Use only the left `|` on bullet lines; do not add a trailing right `|`.", context)
         self.assertTrue(closing_line.strip("`").isascii())
 
     @unittest.skipUnless(os.name == "nt", "Windows command compatibility test")
