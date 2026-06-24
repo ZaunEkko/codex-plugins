@@ -10,6 +10,7 @@
 [![Marketplace](https://img.shields.io/badge/Marketplace-ZaunEkko-orange.svg)]()
 [![Plugins](https://img.shields.io/badge/Includes-Plugins-blue.svg)]()
 [![Hooks](https://img.shields.io/badge/Supports-Hooks-brightgreen.svg)]()
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 </div>
 
@@ -65,7 +66,7 @@
 <td width="50%">
 
 ### 💡 explanatory-output-style
-让 Codex 在会话启动时进入解释型输出风格，写代码时补充简短、贴近当前代码库的实现思路。
+把 Claude Code 官方 explanatory-output-style 插件的解释型协作体验适配到 Codex。它通过 SessionStart hook 在会话启动时注入额外上下文，让 Codex 在写代码前后补充简短、贴近当前代码库的 Insight 说明。
 
 </td>
 <td width="50%">
@@ -78,6 +79,8 @@
 </td>
 </tr>
 </table>
+
+详细功能、差异说明、安装和 hook 信任说明见 [docs/explanatory-output-style/README.md](docs/explanatory-output-style/README.md)。
 
 ---
 
@@ -127,6 +130,14 @@ Codex 使用解释型输出风格协作
 
 ---
 
+## 📚 插件文档
+
+每个插件单独维护文档，根 README 只保留入口导航：
+
+- [`explanatory-output-style`](docs/explanatory-output-style/README.md)：解释型输出风格插件说明、安装、hook 信任方式和本地验证命令。
+
+---
+
 ## 🏗️ 仓库结构
 
 ```text
@@ -134,6 +145,9 @@ codex-plugins/
 ├── .agents/
 │   └── plugins/
 │       └── marketplace.json          # Codex marketplace 入口
+├── docs/
+│   └── explanatory-output-style/
+│       └── README.md                 # explanatory-output-style 插件说明
 ├── plugins/
 │   └── explanatory-output-style/
 │       ├── .codex-plugin/
@@ -141,6 +155,8 @@ codex-plugins/
 │       └── hooks/
 │           ├── hooks.json            # SessionStart hook 配置
 │           └── session_start.py      # additionalContext 输出脚本
+├── tests/
+│   └── test_explanatory_output_style.py
 └── README.md
 ```
 
@@ -208,6 +224,12 @@ python -m unittest tests.test_explanatory_output_style
 </td>
 </tr>
 </table>
+
+---
+
+## 📄 许可证
+
+本项目使用 [MIT License](LICENSE) 开源。你可以在保留版权和许可证声明的前提下使用、复制、修改、分发和再授权本仓库内容。
 
 ---
 
