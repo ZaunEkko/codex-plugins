@@ -1,8 +1,10 @@
 # explanatory-output-style
 
+[简体中文](README.md) · [English](../../i18n/en/docs/explanatory-output-style/README.md) · [繁體中文](../../i18n/zh-TW/docs/explanatory-output-style/README.md) · [日本語](../../i18n/ja/docs/explanatory-output-style/README.md) · [한국어](../../i18n/ko/docs/explanatory-output-style/README.md)
+
 `explanatory-output-style` 是一个 Codex 插件，用来在 Codex 会话中启用解释型输出风格。
 
-它参考 Claude Code 官方 [`explanatory-output-style`](https://github.com/anthropics/claude-code/tree/main/plugins/explanatory-output-style) 插件的功能体验：通过 `SessionStart` hook 在会话开始时加入额外指导，让模型在写代码或修改代码时，补充简短、贴近当前代码库的 Insight 说明。
+它参考 Claude Code 官方 [`explanatory-output-style`](https://github.com/anthropics/claude-code/tree/main/plugins/explanatory-output-style) 插件的功能体验：通过 `SessionStart` hook 在会话开始时加入额外指导，让模型在写代码或修改代码时补充简短、贴近当前代码库的 Insight 说明。
 
 ## 适合什么场景
 
