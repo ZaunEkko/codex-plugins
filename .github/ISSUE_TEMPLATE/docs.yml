@@ -1,0 +1,28 @@
+name: Documentation
+description: 报告文档问题或提出文档改进建议
+title: "[Docs]: "
+labels:
+  - documentation
+body:
+  - type: input
+    id: page
+    attributes:
+      label: 文档位置
+      description: 相关 README、docs 路径或链接。
+      placeholder: docs/explanatory-output-style/README.md
+    validations:
+      required: true
+  - type: textarea
+    id: issue
+    attributes:
+      label: 问题或建议
+      description: 说明哪里不清楚、过期、链接错误或需要补充。
+    validations:
+      required: true
+  - type: textarea
+    id: proposed
+    attributes:
+      label: 建议改法
+      description: 如果你有建议文案或结构，可以写在这里。
+    validations:
+      required: false
