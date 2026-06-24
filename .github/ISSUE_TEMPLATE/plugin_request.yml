@@ -1,0 +1,34 @@
+name: Plugin request
+description: 请求新增 Codex 插件、hook、skill 或预设
+title: "[Plugin request]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 想解决什么问题
+      description: 描述希望 Codex 插件帮你自动化或统一的工作流。
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 期望的插件能力
+      description: 说明希望包含 manifest、hook、skill、MCP 配置还是其他能力。
+    validations:
+      required: true
+  - type: textarea
+    id: usage
+    attributes:
+      label: 使用方式草案
+      description: 如果你已经想好安装、命令或触发方式，可以写在这里。
+    validations:
+      required: false
+  - type: textarea
+    id: safety
+    attributes:
+      label: Hook / 安全考虑
+      description: 如果需要 command hook，请说明它会执行什么命令、是否需要用户 trust。
+    validations:
+      required: false
