@@ -1,5 +1,7 @@
 # Security Policy
 
+[简体中文](SECURITY.md) · [English](i18n/en/SECURITY.md) · [繁體中文](i18n/zh-TW/SECURITY.md) · [日本語](i18n/ja/SECURITY.md) · [한국어](i18n/ko/SECURITY.md)
+
 ## 支持范围
 
 当前支持 `main` 分支上的最新发布内容，以及正在 `dev` 分支准备中的插件改动。
