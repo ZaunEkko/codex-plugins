@@ -1,5 +1,7 @@
 # Contributing
 
+[简体中文](CONTRIBUTING.md) · [English](i18n/en/CONTRIBUTING.md) · [繁體中文](i18n/zh-TW/CONTRIBUTING.md) · [日本語](i18n/ja/CONTRIBUTING.md) · [한국어](i18n/ko/CONTRIBUTING.md)
+
 感谢你对 `codex-plugins` 的关注。这个仓库主要维护面向 Codex 的插件、hooks、skills、预设和相关文档。
 
 ## 分支与提交流程
@@ -12,15 +14,7 @@
 - `release/*`：发布准备，从 `dev` 拉出，完成后合入 `main` 和 `dev`。
 - `hotfix/*`：紧急修复，从 `main` 拉出，完成后合入 `main` 和 `dev`。
 
-请不要直接推送到 `main` 或 `dev`。这两个分支受保护，改动应通过 Pull Request 合并，并等待必需检查通过。
-
-提交信息建议使用简短中文祈使句，例如：
-
-```text
-补充插件文档
-修正 hook 输出格式
-添加插件验证 CI
-```
+不要直接推送到 `main` 或 `dev`。这两个分支受保护，改动应通过 Pull Request 合并，并等待必需检查通过。
 
 ## 仓库结构约定
 
@@ -43,14 +37,7 @@ docs/<plugin-name>/
 
 ## 插件文档要求
 
-每个插件文档至少说明：
-
-- 插件解决什么问题。
-- 安装方式。
-- 启用或信任步骤。
-- 如果包含 command hook，需要说明 `/hooks` 审查和 trust。
-- 主要文件路径，例如 manifest、hook 配置、入口脚本。
-- 维护者如何验证该插件。
+每个插件文档至少说明：插件解决什么问题、安装方式、启用或信任步骤、主要文件路径、维护者如何验证。包含 command hook 时，需要说明 `/hooks` 审查和 trust。
 
 ## 验证要求
 
@@ -77,29 +64,11 @@ python -m unittest tests.test_explanatory_output_style
 
 ## Hook 与安全要求
 
-Codex command hook 会在用户环境中执行命令，贡献时请特别注意：
-
 - 不要在 hook 输出、manifest、测试或文档中写入 API key、token、密码、私钥或机器专属路径。
 - 不要引入不透明或难以审查的命令字符串。
 - 保留必要的跨平台支持；Windows 和 Unix 命令不同时，应分别写清楚。
 - 新增或修改 command hook 后，必须在 PR 中说明安全影响和用户需要 review / trust 的内容。
-- 示例数据不要包含真实凭据或个人隐私信息。
 
 ## Pull Request 要求
 
-PR 描述应包含：
-
-- 变更内容。
-- 已运行的验证命令。
-- 是否修改 hook、manifest 或 marketplace 元数据。
-- Hook / 安全影响。
-- 如有未运行的验证，明确说明原因。
-
-## Issue 与讨论
-
-提交 issue 时，请尽量说明：
-
-- 使用的 Codex 版本和操作系统。
-- 插件名称和安装方式。
-- 复现步骤、期望结果和实际结果。
-- 相关日志或错误信息；不要贴出 token、API key、密码等敏感信息。
+PR 描述应包含变更内容、已运行的验证命令、是否修改 hook / manifest / marketplace 元数据、Hook / 安全影响，以及未运行验证的原因。
