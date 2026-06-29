@@ -1,6 +1,6 @@
 {
   "name": "commit-commands",
-  "version": "1.0.0+codex.20260629190515",
+  "version": "1.0.0+codex.20260629111206",
   "description": "Streamline git commit, push, pull request, and stale branch cleanup workflows for Codex.",
   "author": {
     "name": "ZaunEkko"
