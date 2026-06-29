@@ -1,56 +1,69 @@
-# Commit Commands
+# commit-commands
 
-`commit-commands` 是一个把常用 Git 提交流程封装成 Codex slash commands 的插件。
+[简体中文](README.md) · [English](../../i18n/en/docs/commit-commands/README.md) · [繁體中文](../../i18n/zh-TW/docs/commit-commands/README.md) · [日本語](../../i18n/ja/docs/commit-commands/README.md) · [한국어](../../i18n/ko/docs/commit-commands/README.md)
 
-它适配了 Anthropic `commit-commands` 的核心体验：
+`commit-commands` 把常用 Git 工作流封装成三个原生 Codex skill：
 
 ```text
-/commit
-/commit-push-pr
-/clean_gone
+$commit
+$commit-push-pr
+$clean-gone
 ```
 
-## 安装
+Codex 可以根据明确的自然语言意图自动选择 skill；`$skill-name` 用于显式强制调用。仅仅完成实现不会自动授权提交、推送、创建 PR 或删除分支。
+
+## 安装与启用
 
 ```bash
 codex plugin marketplace add ZaunEkko/codex-plugins
 codex plugin add commit-commands@zaunekko
 ```
 
-## `/commit`
+安装或更新后请新开 Codex thread，使新的 skill 元数据进入会话。
 
-用于日常开发中快速提交当前改动。
+## 自动选择示例
 
-它会让 Codex 查看工作区、diff 和最近 commit 风格，生成合适的提交信息，stage 相关文件，并创建单个 commit。
+- “提交这些改动”可以自动选择 `commit`。
+- “推送当前分支并创建 PR”可以自动选择 `commit-push-pr`。
+- “清理已经合并的 gone 分支”可以自动选择 `clean-gone`。
+- “功能已经完成”不会自行触发任何 Git 副作用。
 
-默认追加：
+## `$commit`
 
-```text
-Co-authored-by: Codex <noreply@openai.com>
-```
+检查仓库规范、当前分支、工作区、暂存区和近期提交风格，只暂存与当前任务相关且安全的文件，然后创建一个本地 commit。
 
-## `/commit-push-pr`
-
-用于功能完成后发布分支并打开 PR。
-
-它会先读取仓库内的协作规范，识别基线分支和受保护分支。如果当前位于 `main`、`master`、`dev`、`develop` 或仓库指定的集成分支，会先创建合规的工作分支，再提交、发布并向指定集成分支打开 PR。
-
-## `/clean_gone`
-
-用于清理远程已删除但本地仍存在的 stale branch。
-
-它会先更新远程分支信息，再检查标记为 `[gone]` 的本地分支。只有分支已合入仓库认可的集成分支、关联 worktree 干净且不是当前分支时，才会使用非强制删除；不满足条件的分支会保留并说明原因。
-
-## 归因
-
-本插件默认使用：
+它会跳过明显的凭据、私钥、环境文件、依赖目录、构建产物、缓存、日志和机器专属文件。生成的提交会追加：
 
 ```text
 Co-authored-by: Codex <noreply@openai.com>
 ```
 
-该地址来自 `openai/codex` 仓库中的 Codex baseline git signature。
+该 skill 不会推送或创建 PR。
 
-## 注意
+## `$commit-push-pr`
 
-这个插件会触发本地 Git 工作流。使用前请确认当前目录是正确仓库，并在合并 PR 前人工 review。命令不会直接向受保护分支提交或推送，也不会强制删除未合并分支或脏 worktree。
+读取 `AGENTS.md`、`CONTRIBUTING.md` 等仓库规范，确定基线分支、工作分支名称、验证命令和 PR 目标分支。
+
+- 不直接向 `main`、`master`、`dev`、`develop` 或仓库指定的受保护分支提交或推送。
+- 当前分支不合规时，只在能够安全保留改动的情况下创建合规工作分支。
+- 不会自行 reset、stash、rebase、force push 或绕过验证。
+- 创建一个 commit、发布工作分支，并使用 GitHub CLI 打开 PR。
+
+该 skill 需要已经安装并登录 GitHub CLI，仓库还需要配置 `origin` remote。
+
+## `$clean-gone`
+
+先运行 `git fetch --prune`，再检查 upstream 标记为 `[gone]` 的本地分支。`[gone]` 只表示远程引用已删除，不代表本地提交已经合并。
+
+只有候选分支不是当前或受保护分支、已经合入仓库认可的集成分支、关联 worktree 可读且干净，并且 Git 的非强制删除检查通过时，才会删除。其他候选项会保留并报告原因。
+
+## 与 Claude 原版的关系
+
+Anthropic 原版提供手动调用的 slash commands。本适配保留其工作流目标并强化安全边界，同时改用 Codex 原生 skills，以支持自然语言隐式选择和 `$skill-name` 显式调用。
+
+## 本地验证
+
+```bash
+python -m unittest discover -s tests
+codex plugin list
+```
