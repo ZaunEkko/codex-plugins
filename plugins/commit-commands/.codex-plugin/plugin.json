@@ -1,0 +1,21 @@
+{
+  "name": "commit-commands",
+  "version": "1.0.0+codex.20260629172500",
+  "description": "Streamline git commit, push, pull request, and stale branch cleanup workflows for Codex.",
+  "author": {
+    "name": "ZaunEkko"
+  },
+  "interface": {
+    "displayName": "Commit Commands",
+    "shortDescription": "Git commit, push, PR, and stale branch cleanup commands.",
+    "longDescription": "A Codex adaptation of Anthropic's commit-commands plugin. It provides /commit, /commit-push-pr, and /clean_gone workflows, and appends Codex co-author attribution to generated commits and PR descriptions.",
+    "developerName": "ZaunEkko",
+    "category": "Productivity",
+    "capabilities": [
+      "Commands"
+    ],
+    "defaultPrompt": [
+      "When using commit-commands, preserve the repository's commit style, avoid committing secrets, and append Codex attribution with: Co-authored-by: Codex <noreply@openai.com>."
+    ]
+  }
+}
