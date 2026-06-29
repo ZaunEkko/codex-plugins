@@ -24,6 +24,22 @@ class CommitCommandsPluginTests(unittest.TestCase):
         text = (PLUGIN_ROOT / "commands" / "commit.md").read_text(encoding="utf-8")
         self.assertIn("noreply@openai.com", text)
 
+    def test_commit_push_pr_protects_integration_branches(self):
+        text = (PLUGIN_ROOT / "commands" / "commit-push-pr.md").read_text(encoding="utf-8")
+        self.assertIn("`dev`", text)
+        self.assertIn("repository-local workflow instructions", text)
+        self.assertIn("Never commit or push directly to a protected branch", text)
+        self.assertIn("repository-required integration branch", text)
+
+    def test_clean_gone_preserves_unsafe_candidates(self):
+        text = (PLUGIN_ROOT / "commands" / "clean_gone.md").read_text(encoding="utf-8")
+        self.assertIn("git merge-base --is-ancestor", text)
+        self.assertIn("git -C <worktree-path> status --short", text)
+        self.assertIn("git branch -d <branch>", text)
+        self.assertNotIn("git branch -D", text)
+        self.assertNotIn("worktree remove --force", text)
+        self.assertIn("skip the branch as unmerged", text)
+
     def test_marketplace_registers_plugin(self):
         marketplace = json.loads(MARKETPLACE.read_text(encoding="utf-8"))
         plugins = {plugin["name"]: plugin for plugin in marketplace["plugins"]}

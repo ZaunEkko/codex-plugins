@@ -35,11 +35,12 @@ Completes a branch-to-PR workflow.
 
 What it does:
 
-1. Creates a new feature branch if currently on `main` or `master`.
-2. Stages and commits relevant safe changes.
-3. Publishes the branch to `origin`.
-4. Opens a pull request with the GitHub CLI.
-5. Adds a concise PR body with summary, test plan, notes/risks, and Codex attribution.
+1. Reads repository-local workflow instructions and identifies the required base branch.
+2. Creates a compliant work branch when currently on `main`, `master`, `dev`, `develop`, or another protected branch.
+3. Stages and commits relevant safe changes.
+4. Publishes only the compliant work branch to `origin`.
+5. Opens a pull request against the required integration branch with the GitHub CLI.
+6. Adds a concise PR body with summary, test plan, notes/risks, and Codex attribution.
 
 Usage:
 
@@ -61,8 +62,10 @@ What it does:
 
 1. Runs a prune fetch.
 2. Lists local branches with `[gone]` status.
-3. Removes associated worktrees when needed.
-4. Deletes stale local branches.
+3. Verifies that each candidate is merged into an approved integration branch.
+4. Skips current, unmerged, or dirty-worktree branches.
+5. Removes only clean associated worktrees without bypassing safety checks.
+6. Deletes branches with Git's non-forced merged-branch check.
 
 Usage:
 
@@ -72,7 +75,7 @@ Usage:
 
 ## Guardrails
 
-The commands instruct Codex to skip local-only files, generated output, dependency folders, caches, logs, and environment/config files that do not belong in the repository.
+The commands instruct Codex to skip local-only files, generated output, dependency folders, caches, logs, and environment/config files that do not belong in the repository. Publishing never targets a protected branch directly, and stale-branch cleanup preserves dirty or unmerged work.
 
 Always review the resulting commit or PR before merging.
 
