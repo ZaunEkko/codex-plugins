@@ -1,5 +1,5 @@
 ---
-allowed-tools: Bash(git fetch:*), Bash(git branch:*), Bash(git worktree:*), Bash(git rev-parse:*)
+allowed-tools: Bash(git fetch:*), Bash(git branch:*), Bash(git worktree:*), Bash(git rev-parse:*), Bash(git merge-base:*), Bash(git status:*), Bash(git -C:*)
 description: Clean up local branches marked as gone
 ---
 
@@ -18,34 +18,42 @@ git fetch --prune
 2. List local branches and identify entries marked `[gone]`:
 
 ```bash
-git branch -v
+git branch -vv
 ```
 
-3. List worktrees so branches attached to worktrees can be handled safely:
+3. Read repository-local workflow instructions and identify the repository's protected or integration branches, such as `main`, `master`, `dev`, or `develop`.
+
+4. List worktrees in a machine-readable format so branches attached to worktrees can be handled safely:
 
 ```bash
-git worktree list
+git worktree list --porcelain
 ```
 
-4. For each local branch marked `[gone]`:
-   - If it has an associated worktree, remove that worktree first.
-   - Delete the local branch after its worktree is gone.
+5. For each local branch marked `[gone]`:
+   - Skip the current branch.
+   - Verify that its tip is merged into at least one repository-approved integration branch:
 
-## Suggested command
+     ```bash
+     git merge-base --is-ancestor <branch> <approved-base>
+     ```
 
-```bash
-git branch -v | grep '\[gone\]' | sed 's/^[+* ]//' | awk '{print $1}' | while read branch; do
-  echo "Processing branch: $branch"
-  worktree=$(git worktree list | grep "\\[$branch\\]" | awk '{print $1}')
-  if [ -n "$worktree" ] && [ "$worktree" != "$(git rev-parse --show-toplevel)" ]; then
-    echo "  Removing worktree: $worktree"
-    git worktree remove --force "$worktree"
-  fi
-  echo "  Deleting branch: $branch"
-  git branch -D "$branch"
-done
-```
+   - If no approved base contains the branch tip, skip the branch as unmerged.
+   - If it has an associated worktree, inspect that worktree first:
+
+     ```bash
+     git -C <worktree-path> status --short
+     ```
+
+   - If the worktree is dirty or cannot be inspected, skip the branch and preserve the worktree.
+   - If the worktree is clean, remove it with `git worktree remove <worktree-path>`.
+   - Delete the branch with `git branch -d <branch>`. If Git refuses, preserve the branch and report the reason.
+
+## Safety rules
+
+- A `[gone]` upstream proves only that the remote reference was deleted; it does not prove that the local work is merged.
+- Never remove the main worktree, a dirty worktree, the current branch, or an unmerged branch.
+- Never bypass Git's merged-branch checks during cleanup.
 
 ## Expected response
 
-Report which worktrees and branches were removed. If no branches are marked `[gone]`, say that no cleanup was needed.
+Report which worktrees and branches were removed and which candidates were skipped, including the reason. If no branches are marked `[gone]`, say that no cleanup was needed.
