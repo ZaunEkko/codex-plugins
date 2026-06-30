@@ -21,12 +21,14 @@
 | プラグイン | 種類 | 説明 | ドキュメント |
 |------------|------|------|--------------|
 | explanatory-output-style | Plugin + SessionStart Hook | Claude Code 公式の explanatory-output-style 体験を Codex に適配します。 | [プラグイン docs](docs/explanatory-output-style/README.md) |
+| commit-commands | Plugin + Skills | Anthropic 原版の commit、commit-push-pr、gone ブランチの force cleanup を提供します。 | [プラグイン docs](docs/commit-commands/README.md) |
 
 ## 🚀 クイックスタート
 
 ```bash
 codex plugin marketplace add ZaunEkko/codex-plugins
 codex plugin add explanatory-output-style@zaunekko
+codex plugin add commit-commands@zaunekko
 ```
 
 command hook を含むプラグインは、初回利用前に Codex で確認して trust してください。
@@ -38,12 +40,14 @@ command hook を含むプラグインは、初回利用前に Codex で確認し
 ## 📚 プラグイン docs
 
 - [explanatory-output-style](docs/explanatory-output-style/README.md): 機能、インストール、hook の trust、ローカル検証。
+- [commit-commands](docs/commit-commands/README.md): commit、PR 公開、ブランチ整理、安全制約、ローカル検証。
 
 ## ⚠️ Trust & Safety
 
 - インストール前にプラグイン説明を確認してください。
 - `/hooks` で command hook を確認してください。
 - hook を変更したら再度 trust してください。
+- commit、push、ブランチ削除を行う skill を起動する前に、リポジトリの状態を確認してください。
 - API key、token、パスワード、マシン固有パスを hook 出力に含めないでください。
 
 ## 📄 ライセンス

@@ -38,12 +38,14 @@
 | 插件 | 类型 | 说明 | 文档 |
 |------|------|------|------|
 | explanatory-output-style | Plugin + SessionStart Hook | 把 Claude Code 官方 explanatory-output-style 插件的解释型协作体验适配到 Codex。 | [插件文档](docs/explanatory-output-style/README.md) |
+| commit-commands | Plugin + Skills | 按 Anthropic 原版复刻 commit、commit-push-pr 与 force 清理 gone 分支工作流。 | [插件文档](docs/commit-commands/README.md) |
 
 ## 🚀 快速开始
 
 ```bash
 codex plugin marketplace add ZaunEkko/codex-plugins
 codex plugin add explanatory-output-style@zaunekko
+codex plugin add commit-commands@zaunekko
 ```
 
 包含 command hook 的插件首次运行前需要在 Codex 中 review 并 trust：
@@ -72,11 +74,22 @@ Codex 使用解释型输出风格协作
 - 希望把常用提示词变成可安装插件。
 - 希望给团队或朋友共享同一套 Codex 工作方式。
 
+`commit-commands` 提供三个 Git 工作流 skill。Codex 可以根据“提交改动”“明确要求发布 PR”“清理 gone 分支”等明确意图自动选择，也可以使用 `$` 强制调用：
+
+```text
+$commit
+$commit-push-pr
+$clean-gone
+```
+
+这些 skill 不会仅因工作完成就擅自执行副作用。工作流步骤以 Anthropic 原版为准；其中 `clean-gone` 会像原版一样执行 `git worktree remove --force` 和 `git branch -D`，调用前必须先审查仓库状态。
+
 ## 📚 插件文档
 
 每个插件单独维护文档，根 README 只保留入口导航：
 
 - [explanatory-output-style](docs/explanatory-output-style/README.md)：解释型输出风格插件说明、安装、hook 信任方式和本地验证命令。
+- [commit-commands](docs/commit-commands/README.md)：提交、发布 PR、分支清理、安全边界和本地验证说明。
 
 ## 🏗️ 仓库结构
 
@@ -87,6 +100,8 @@ codex-plugins/
 ├── docs/<plugin-name>/README.md
 ├── plugins/<plugin-name>/.codex-plugin/plugin.json
 ├── plugins/<plugin-name>/hooks/
+├── plugins/<plugin-name>/skills/<skill-name>/SKILL.md
+├── i18n/<language>/docs/<plugin-name>/README.md
 ├── tests/
 └── README.md
 ```
@@ -98,7 +113,7 @@ codex-plugins/
 | 输出风格 | explanatory-output-style | ✅ 已提供 |
 | 项目上下文 | 自动注入项目约定、目录说明、常用命令 | 🧪 计划中 |
 | Review 风格 | 固定代码审查口径和检查清单 | 🧪 计划中 |
-| 开发辅助 | 常用开发流程 skills | 🧪 计划中 |
+| 开发辅助 | commit-commands Git 工作流 | ✅ 已提供 |
 | Hook 自动化 | session/tool/stop 生命周期脚本 | 🧪 计划中 |
 
 ## 🧪 本地验证
@@ -107,7 +122,7 @@ codex-plugins/
 codex plugin list
 python -m py_compile plugins/explanatory-output-style/hooks/session_start.py
 python plugins/explanatory-output-style/hooks/session_start.py
-python -m unittest tests.test_explanatory_output_style
+python -m unittest discover -s tests
 ```
 
 ## ⚠️ Trust & Safety
@@ -115,6 +130,7 @@ python -m unittest tests.test_explanatory_output_style
 - 安装前看清插件说明。
 - 在 `/hooks` 中 review command hook。
 - 改动 hook 后重新 trust。
+- 触发会提交、推送或删除分支的 skill 前先审查当前仓库状态。
 - 不要把 API key、token、密码或机器专属路径写进 hook 输出。
 
 ## 📄 许可证
