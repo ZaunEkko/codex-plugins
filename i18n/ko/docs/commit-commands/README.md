@@ -48,6 +48,7 @@ Co-authored-by: Codex <noreply@openai.com>
 - 현재 변경을 안전하게 보존할 수 있을 때만 규칙에 맞는 작업 브랜치를 생성합니다.
 - reset, stash, rebase, force push 또는 검증 우회를 자동 실행하지 않습니다.
 - 하나의 commit 을 만들고 작업 브랜치를 게시한 뒤 GitHub CLI 로 PR 을 엽니다.
+- 사용자가 PR 생성 또는 열기를 명시적으로 요청하거나 전체 commit-push-PR 흐름을 명시적으로 요청한 경우에만 선택됩니다. "commit 하고 push" 또는 "브랜치 게시" 요청만으로는 PR 생성을 허용하지 않습니다.
 
 이 skill 을 사용하려면 GitHub CLI 가 설치되고 로그인되어 있어야 하며 저장소에 `origin` remote 가 필요합니다.
 
@@ -55,7 +56,7 @@ Co-authored-by: Codex <noreply@openai.com>
 
 `git fetch --prune` 을 실행하고 upstream 이 `[gone]` 인 로컬 브랜치를 확인합니다. `[gone]` 은 원격 참조가 삭제되었다는 뜻일 뿐 로컬 commit 이 merge 되었다는 증거는 아닙니다.
 
-현재 또는 보호 브랜치가 아니고, 승인된 통합 브랜치에 merge 되었으며, 연결된 worktree 를 읽을 수 있고 clean 하며, Git 의 비강제 삭제 검사를 통과한 후보만 삭제합니다. 나머지 후보는 이유와 함께 보존합니다.
+연결된 worktree 는 `git status --short --ignored=matching` 이 tracked, untracked 또는 ignored 경로를 하나도 보고하지 않을 때만 제거합니다. 브랜치 비강제 삭제는 merge 증명에 사용한 통합 ref 와 `HEAD` 가 같은 worktree 에서만 실행하며, 해당 worktree 가 없거나 Git 이 삭제를 거부하면 이유와 함께 후보를 보존합니다.
 
 ## Claude 원본과의 관계
 

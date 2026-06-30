@@ -48,6 +48,7 @@ Co-authored-by: Codex <noreply@openai.com>
 - 当前分支不合规时，只在能够安全保留改动的情况下创建合规工作分支。
 - 不会自行 reset、stash、rebase、force push 或绕过验证。
 - 创建一个 commit、发布工作分支，并使用 GitHub CLI 打开 PR。
+- 只有用户明确要求创建或打开 PR，或明确要求完整 commit-push-PR 流程时才会触发；仅“提交并推送”或“发布分支”不代表允许创建 PR。
 
 该 skill 需要已经安装并登录 GitHub CLI，仓库还需要配置 `origin` remote。
 
@@ -55,7 +56,9 @@ Co-authored-by: Codex <noreply@openai.com>
 
 先运行 `git fetch --prune`，再检查 upstream 标记为 `[gone]` 的本地分支。`[gone]` 只表示远程引用已删除，不代表本地提交已经合并。
 
-只有候选分支不是当前或受保护分支、已经合入仓库认可的集成分支、关联 worktree 可读且干净，并且 Git 的非强制删除检查通过时，才会删除。其他候选项会保留并报告原因。
+只有候选分支不是当前或受保护分支、已经合入仓库认可的集成分支，并且关联 worktree 的 `git status --short --ignored=matching` 没有报告 tracked、untracked 或 ignored 路径时，才会移除 worktree。
+
+分支删除必须从 `HEAD` 等于上述已验证集成 ref 的 worktree 执行非强制 `git branch -d`。缺少该 worktree 或 Git 拒绝删除时，会保留候选项并报告原因，不会改用无关的当前分支或强制删除。
 
 ## 与 Claude 原版的关系
 

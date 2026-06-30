@@ -48,6 +48,7 @@ Reads repository instructions such as `AGENTS.md` and `CONTRIBUTING.md`, then de
 - It creates a compliant work branch only when current changes can be preserved safely.
 - It never resets, stashes, rebases, force pushes, or bypasses validation on its own.
 - It creates one commit, publishes the work branch, and opens a pull request with GitHub CLI.
+- It is selected only when the user explicitly asks to create or open a PR, or explicitly requests the full commit-push-PR workflow. Commit-and-push-only or branch-publishing requests do not authorize PR creation.
 
 This skill requires an installed and authenticated GitHub CLI plus an `origin` remote.
 
@@ -55,7 +56,7 @@ This skill requires an installed and authenticated GitHub CLI plus an `origin` r
 
 Runs `git fetch --prune`, then checks local branches whose upstream is `[gone]`. `[gone]` means only that the remote reference was deleted; it does not prove the local commits were merged.
 
-A candidate is removed only when it is not current or protected, is merged into a repository-approved integration branch, has no dirty or unreadable linked worktree, and passes Git's non-forced deletion checks. Every other candidate is preserved with a reason.
+A linked worktree is removed only when `git status --short --ignored=matching` reports no tracked, untracked, or ignored path. Branch deletion then runs non-forced from a worktree whose `HEAD` is the exact approved integration ref used for the merge proof. If that worktree is unavailable or Git refuses deletion, the candidate is preserved with a reason.
 
 ## Relationship to the Claude plugin
 

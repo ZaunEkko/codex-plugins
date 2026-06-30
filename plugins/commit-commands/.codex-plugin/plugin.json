@@ -1,6 +1,6 @@
 {
   "name": "commit-commands",
-  "version": "1.0.0+codex.20260629115016",
+  "version": "1.0.0+codex.20260630012414",
   "description": "Repository-aware Git commit, pull request publishing, and stale branch cleanup skills for Codex.",
   "author": {
     "name": "ZaunEkko"

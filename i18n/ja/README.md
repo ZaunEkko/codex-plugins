@@ -21,7 +21,7 @@
 | プラグイン | 種類 | 説明 | ドキュメント |
 |------------|------|------|--------------|
 | explanatory-output-style | Plugin + SessionStart Hook | Claude Code 公式の explanatory-output-style 体験を Codex に適配します。 | [プラグイン docs](docs/explanatory-output-style/README.md) |
-| commit-commands | Plugin + Skills | 明確な意図に応じて自動選択できる、安全チェック付きの commit、PR 公開、古いブランチ整理フローを提供します。 | [プラグイン docs](docs/commit-commands/README.md) |
+| commit-commands | Plugin + Skills | 安全な commit、明示的に依頼された PR 公開、ignored ファイルを保護する古いブランチ整理フローを提供します。 | [プラグイン docs](docs/commit-commands/README.md) |
 
 ## 🚀 クイックスタート
 

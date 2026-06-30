@@ -1,6 +1,6 @@
 ---
 name: commit-push-pr
-description: Commit safe current changes, publish a compliant work branch to origin, and open a pull request with GitHub CLI while following repository branch policy. Use when the user explicitly asks to commit and push, publish a branch, create or open a PR, or complete the commit-push-PR workflow. Do not use for commit-only requests or without explicit publishing intent.
+description: Commit safe current changes, publish a compliant work branch to origin, and open a pull request with GitHub CLI while following repository branch policy. Use only when the user explicitly asks to create or open a pull request, or explicitly requests the full commit-push-PR workflow. Do not use for commit-only, commit-and-push-only, or branch-publishing requests without explicit PR intent.
 ---
 
 # Commit, Push, and Open PR

@@ -48,6 +48,7 @@ Co-authored-by: Codex <noreply@openai.com>
 - 只有在可以安全保留目前改動時，才建立合規工作分支。
 - 不會自行 reset、stash、rebase、force push 或略過驗證。
 - 建立一個 commit、發布工作分支，並使用 GitHub CLI 開啟 PR。
+- 只有使用者明確要求建立或開啟 PR，或明確要求完整 commit-push-PR 流程時才會觸發；僅「提交並推送」或「發布分支」不代表允許建立 PR。
 
 此 skill 需要已安裝並登入 GitHub CLI，倉庫也需要設定 `origin` remote。
 
@@ -55,7 +56,7 @@ Co-authored-by: Codex <noreply@openai.com>
 
 先執行 `git fetch --prune`，再檢查 upstream 標記為 `[gone]` 的本地分支。`[gone]` 只代表遠端參照已刪除，不代表本地提交已經合併。
 
-只有候選分支不是目前或受保護分支、已合入倉庫認可的整合分支、關聯 worktree 可讀且乾淨，並通過 Git 非強制刪除檢查時才會刪除。其他候選項都會保留並回報原因。
+只有關聯 worktree 的 `git status --short --ignored=matching` 沒有回報 tracked、untracked 或 ignored 路徑時，才會移除 worktree。分支則只會從 `HEAD` 等於合併證明所用整合 ref 的 worktree 執行非強制刪除；缺少該 worktree 或 Git 拒絕刪除時，會保留候選項並回報原因。
 
 ## 與 Claude 原版的關係
 
