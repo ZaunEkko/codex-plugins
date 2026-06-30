@@ -1,0 +1,25 @@
+{
+  "name": "commit-commands",
+  "version": "1.0.0+codex.20260630020103",
+  "description": "Codex-native skills matching Anthropic's commit, commit-push-pr, and clean_gone workflows.",
+  "author": {
+    "name": "ZaunEkko"
+  },
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Commit Commands",
+    "shortDescription": "Anthropic commit commands adapted as Codex skills.",
+    "longDescription": "A native Codex skill adaptation of Anthropic's commit-commands plugin. It preserves the original commit, commit-push-pr, and forceful clean_gone workflows while adding Codex-native invocation and Codex attribution.",
+    "developerName": "ZaunEkko",
+    "category": "Productivity",
+    "capabilities": [
+      "Skills",
+      "Git Workflows"
+    ],
+    "defaultPrompt": [
+      "Create one commit for my current changes.",
+      "Commit my changes, push the branch, and open a pull request.",
+      "Force-clean local branches whose upstream is gone."
+    ]
+  }
+}
