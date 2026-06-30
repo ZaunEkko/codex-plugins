@@ -41,7 +41,7 @@ class CommitCommandsPluginTests(unittest.TestCase):
                 skill_text = (path / "SKILL.md").read_text(encoding="utf-8")
                 metadata_text = (path / "agents" / "openai.yaml").read_text(encoding="utf-8")
                 self.assertIn(f"name: {name}", skill_text)
-                self.assertIn("Use when the user explicitly asks", skill_text)
+                self.assertIn("user explicitly asks", skill_text)
                 self.assertNotIn("[TODO:", skill_text)
                 self.assertIn(f"${name}", metadata_text)
                 self.assertIn("allow_implicit_invocation: true", metadata_text)
@@ -58,13 +58,16 @@ class CommitCommandsPluginTests(unittest.TestCase):
         self.assertIn("repository instructions", text)
         self.assertIn("Never commit or push directly", text)
         self.assertIn("repository-required integration branch", text)
-        self.assertIn("without explicit publishing intent", text)
+        self.assertIn("commit-and-push-only", text)
+        self.assertIn("branch-publishing requests without explicit PR intent", text)
 
     def test_clean_gone_preserves_unsafe_candidates(self):
         text = (SKILLS["clean-gone"] / "SKILL.md").read_text(encoding="utf-8")
         self.assertIn("git merge-base --is-ancestor", text)
-        self.assertIn("git -C <path> status --short", text)
-        self.assertIn("git branch -d <branch>", text)
+        self.assertIn("git -C <path> status --short --ignored=matching", text)
+        self.assertIn("git -C <integration-path> branch -d <branch>", text)
+        self.assertIn("exact approved integration ref", text)
+        self.assertIn("tracked, untracked, or ignored path", text)
         self.assertIn("Never use `git branch -D`", text)
         self.assertIn("Never use merely because stale branches exist", text)
 
@@ -80,6 +83,7 @@ class CommitCommandsPluginTests(unittest.TestCase):
                 text = path.read_text(encoding="utf-8")
                 self.assertIn("$commit-push-pr", text)
                 self.assertIn("$clean-gone", text)
+                self.assertIn("--ignored=matching", text)
                 self.assertNotIn("/clean_gone", text)
 
     def test_repository_readmes_register_plugin(self):
@@ -89,6 +93,7 @@ class CommitCommandsPluginTests(unittest.TestCase):
                 self.assertIn("commit-commands@zaunekko", text)
                 self.assertIn("docs/commit-commands/README.md", text)
                 self.assertIn("Plugin + Skills", text)
+                self.assertIn("ignored", text)
 
 
 if __name__ == "__main__":

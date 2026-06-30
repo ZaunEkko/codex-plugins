@@ -23,7 +23,7 @@ The goal is to package useful Codex configurations so other people can install, 
 | Plugin | Type | Description | Docs |
 |--------|------|-------------|------|
 | explanatory-output-style | Plugin + SessionStart Hook | Ports the official Claude Code explanatory-output-style experience to Codex. | [Plugin docs](docs/explanatory-output-style/README.md) |
-| commit-commands | Plugin + Skills | Provides intent-triggered, guarded commit, pull request publishing, and stale branch cleanup workflows. | [Plugin docs](docs/commit-commands/README.md) |
+| commit-commands | Plugin + Skills | Provides guarded commits, explicitly requested PR publishing, and stale branch cleanup that protects ignored files. | [Plugin docs](docs/commit-commands/README.md) |
 
 ## 🚀 Quick start
 

@@ -30,6 +30,8 @@ It never pushes or opens a pull request.
 
 Reads repository branch policy, moves work to a compliant work branch when safe, validates and commits relevant changes, publishes the branch to `origin`, and opens a pull request against the required integration branch with GitHub CLI.
 
+It is selected only for explicit pull request intent or an explicit request for the full commit-push-PR workflow. A commit-and-push-only or branch-publishing request does not authorize PR creation.
+
 It never commits or pushes directly to a protected branch, force pushes, or silently resets, stashes, or rebases current work.
 
 Requirements:
@@ -40,9 +42,9 @@ Requirements:
 
 ### `$clean-gone`
 
-Prunes remote-tracking metadata, finds local branches whose upstream is `[gone]`, proves each candidate merged into an approved integration branch, checks linked worktrees, and uses only non-forced removal.
+Prunes remote-tracking metadata, finds local branches whose upstream is `[gone]`, proves each candidate merged into an approved integration branch, checks linked worktrees with `git status --short --ignored=matching`, and uses only non-forced removal.
 
-It preserves current, protected, unmerged, dirty-worktree, or unreadable candidates and reports why each was skipped.
+It treats tracked, untracked, and ignored paths as local data. Branch deletion runs only from a worktree whose `HEAD` is the exact integration ref used for the merge proof; otherwise the candidate is preserved and reported.
 
 ## Implicit invocation
 

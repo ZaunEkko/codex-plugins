@@ -38,7 +38,7 @@
 | 插件 | 类型 | 说明 | 文档 |
 |------|------|------|------|
 | explanatory-output-style | Plugin + SessionStart Hook | 把 Claude Code 官方 explanatory-output-style 插件的解释型协作体验适配到 Codex。 | [插件文档](docs/explanatory-output-style/README.md) |
-| commit-commands | Plugin + Skills | 提供可按明确意图自动匹配的安全提交、PR 发布和陈旧分支清理工作流。 | [插件文档](docs/commit-commands/README.md) |
+| commit-commands | Plugin + Skills | 提供安全提交、只在明确要求时执行的 PR 发布，以及会保护 ignored 文件的陈旧分支清理工作流。 | [插件文档](docs/commit-commands/README.md) |
 
 ## 🚀 快速开始
 
@@ -74,7 +74,7 @@ Codex 使用解释型输出风格协作
 - 希望把常用提示词变成可安装插件。
 - 希望给团队或朋友共享同一套 Codex 工作方式。
 
-`commit-commands` 提供三个 Git 工作流 skill。Codex 可以根据“提交改动”“发布 PR”“清理 gone 分支”等明确意图自动选择，也可以使用 `$` 强制调用：
+`commit-commands` 提供三个 Git 工作流 skill。Codex 可以根据“提交改动”“明确要求发布 PR”“清理 gone 分支”等明确意图自动选择，也可以使用 `$` 强制调用：
 
 ```text
 $commit
@@ -82,7 +82,7 @@ $commit-push-pr
 $clean-gone
 ```
 
-这些 skill 不会仅因工作完成就擅自执行副作用；它们会遵守仓库内的分支规范，清理 skill 只删除已经合并且 worktree 干净的分支。
+这些 skill 不会仅因工作完成就擅自执行副作用；`commit-push-pr` 只接受明确的 PR 意图，`clean-gone` 会把 tracked、untracked 和 ignored 路径都视为本地数据，并只从已验证集成 ref 的 worktree 执行非强制分支删除。
 
 ## 📚 插件文档
 

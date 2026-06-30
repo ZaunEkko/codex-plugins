@@ -21,7 +21,7 @@
 | 플러그인 | 유형 | 설명 | 문서 |
 |----------|------|------|------|
 | explanatory-output-style | Plugin + SessionStart Hook | Claude Code 공식 explanatory-output-style 경험을 Codex에 맞게 적용합니다. | [플러그인 문서](docs/explanatory-output-style/README.md) |
-| commit-commands | Plugin + Skills | 명확한 의도에 따라 자동 선택되는 안전한 커밋, PR 게시, 오래된 브랜치 정리 흐름을 제공합니다. | [플러그인 문서](docs/commit-commands/README.md) |
+| commit-commands | Plugin + Skills | 안전한 커밋, 명시적으로 요청된 PR 게시, ignored 파일을 보호하는 오래된 브랜치 정리 흐름을 제공합니다. | [플러그인 문서](docs/commit-commands/README.md) |
 
 ## 🚀 빠른 시작
 

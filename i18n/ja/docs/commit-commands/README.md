@@ -48,6 +48,7 @@ Co-authored-by: Codex <noreply@openai.com>
 - 現在の変更を安全に保持できる場合だけ、規約に合う作業ブランチを作成します。
 - reset、stash、rebase、force push、検証の回避を自動実行しません。
 - 1 つの commit を作成し、作業ブランチを公開して GitHub CLI で PR を開きます。
+- ユーザーが PR の作成または開始を明示的に依頼した場合、または完全な commit-push-PR フローを明示的に依頼した場合だけ選択されます。「commit して push」や「ブランチを公開」だけでは PR 作成を許可しません。
 
 この skill には、インストール済みかつログイン済みの GitHub CLI と `origin` remote が必要です。
 
@@ -55,7 +56,7 @@ Co-authored-by: Codex <noreply@openai.com>
 
 `git fetch --prune` を実行し、upstream が `[gone]` のローカルブランチを確認します。`[gone]` はリモート参照の削除だけを示し、ローカル commit の merge を保証しません。
 
-現在または保護ブランチではなく、承認済み統合ブランチへ merge 済みで、関連 worktree が読み取り可能かつ clean であり、Git の非強制削除チェックを通過した候補だけを削除します。その他の候補は理由とともに保持します。
+関連 worktree は、`git status --short --ignored=matching` が tracked、untracked、ignored のパスを一つも報告しない場合だけ削除します。ブランチの非強制削除は、merge 証明に使った統合 ref と `HEAD` が一致する worktree からだけ実行し、その worktree がない場合や Git が拒否した場合は理由とともに候補を保持します。
 
 ## Claude 原版との関係
 

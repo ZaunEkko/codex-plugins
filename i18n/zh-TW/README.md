@@ -21,7 +21,7 @@
 | 插件 | 類型 | 說明 | 文件 |
 |------|------|------|------|
 | explanatory-output-style | Plugin + SessionStart Hook | 將 Claude Code 官方 explanatory-output-style 體驗適配到 Codex。 | [插件文件](docs/explanatory-output-style/README.md) |
-| commit-commands | Plugin + Skills | 提供可依明確意圖自動匹配、具安全檢查的提交、PR 發布與陳舊分支清理流程。 | [插件文件](docs/commit-commands/README.md) |
+| commit-commands | Plugin + Skills | 提供安全提交、只在明確要求時執行的 PR 發布，以及會保護 ignored 檔案的陳舊分支清理流程。 | [插件文件](docs/commit-commands/README.md) |
 
 ## 🚀 快速開始
 
