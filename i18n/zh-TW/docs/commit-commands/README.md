@@ -2,7 +2,7 @@
 
 [简体中文](../../../../docs/commit-commands/README.md) · [English](../../../en/docs/commit-commands/README.md) · [繁體中文](README.md) · [日本語](../../../ja/docs/commit-commands/README.md) · [한국어](../../../ko/docs/commit-commands/README.md)
 
-`commit-commands` 將常用 Git 工作流程封裝成三個原生 Codex skill：
+`commit-commands` 將 [Anthropic 官方原版](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/commit-commands) 的三個 slash command 適配為 Codex 原生 skill：
 
 ```text
 $commit
@@ -10,57 +10,47 @@ $commit-push-pr
 $clean-gone
 ```
 
-Codex 可以依照明確的自然語言意圖自動選擇 skill；`$skill-name` 用於明確指定。僅完成實作不會自動授權提交、推送、建立 PR 或刪除分支。
+工作流程步驟以原版為準。Codex 差異只限於原生 skill 結構、明確意圖的自動選擇、`$skill-name` 入口與 Codex attribution。
 
-## 安裝與啟用
+## 安裝
 
 ```bash
 codex plugin marketplace add ZaunEkko/codex-plugins
 codex plugin add commit-commands@zaunekko
 ```
 
-安裝或更新後請開啟新的 Codex thread，讓新的 skill metadata 進入會話。
+安裝或更新後請開啟新的 Codex thread。
 
 ## 自動選擇範例
 
-- 「提交這些改動」可以自動選擇 `commit`。
-- 「推送目前分支並建立 PR」可以自動選擇 `commit-push-pr`。
-- 「清理已合併的 gone 分支」可以自動選擇 `clean-gone`。
-- 「功能已經完成」不會自行觸發 Git 副作用。
+- 「提交這些改動」可以選擇 `commit`。
+- 「提交、推送並建立 PR」可以選擇 `commit-push-pr`。
+- 「清理所有 gone 分支」可以選擇 `clean-gone`。
+- 「功能已完成」不會自行觸發 Git 副作用。
 
 ## `$commit`
 
-讀取倉庫規範，檢查目前分支、worktree、暫存區和近期提交風格，只暫存與目前任務相關且安全的檔案，然後建立一個本地 commit。
-
-它會略過明顯的憑證、私鑰、環境檔案、依賴目錄、建置產物、快取、日誌和機器專屬檔案。產生的提交會加入：
+檢查 `git status`、`git diff HEAD`、目前分支與最近十筆提交，暫存目前改動並建立一個 commit，加入：
 
 ```text
 Co-authored-by: Codex <noreply@openai.com>
 ```
 
-此 skill 不會推送或建立 PR。
+不會推送、建立 PR 或在沒有改動時建立空 commit。
 
 ## `$commit-push-pr`
 
-讀取 `AGENTS.md`、`CONTRIBUTING.md` 等倉庫規範，決定基線分支、工作分支、驗證命令和 PR 目標分支。
+檢查目前狀態、diff 與分支。只有目前分支恰好是 `main` 時才建立新分支，接著建立一個 commit、推送到 `origin`，並以 `gh pr create` 建立 PR。
 
-- 不直接向 `main`、`master`、`dev`、`develop` 或其他受保護分支提交或推送。
-- 只有在可以安全保留目前改動時，才建立合規工作分支。
-- 不會自行 reset、stash、rebase、force push 或略過驗證。
-- 建立一個 commit、發布工作分支，並使用 GitHub CLI 開啟 PR。
-- 只有使用者明確要求建立或開啟 PR，或明確要求完整 commit-push-PR 流程時才會觸發；僅「提交並推送」或「發布分支」不代表允許建立 PR。
+此 skill 需要明確的 PR 意圖。與原版一樣，它不支援沒有新 commit 也發布 PR，也不會為 `main` 以外的不合規分支自動建立替代分支。
 
-此 skill 需要已安裝並登入 GitHub CLI，倉庫也需要設定 `origin` remote。
+需要已安裝並登入 GitHub CLI，倉庫也必須有 `origin` remote。
 
 ## `$clean-gone`
 
-先執行 `git fetch --prune`，再檢查 upstream 標記為 `[gone]` 的本地分支。`[gone]` 只代表遠端參照已刪除，不代表本地提交已經合併。
+使用 `git branch -v` 與 `git worktree list` 尋找 `[gone]` 分支。每個候選項都會先以 `git worktree remove --force` 強制移除關聯的非主 worktree，再以 `git branch -D` 強制刪除分支。
 
-只有關聯 worktree 的 `git status --short --ignored=matching` 沒有回報 tracked、untracked 或 ignored 路徑時，才會移除 worktree。分支則只會從 `HEAD` 等於合併證明所用整合 ref 的 worktree 執行非強制刪除；缺少該 worktree 或 Git 拒絕刪除時，會保留候選項並回報原因。
-
-## 與 Claude 原版的關係
-
-Anthropic 原版提供手動呼叫的 slash commands。本適配保留其工作流程目標並強化安全邊界，同時改用 Codex 原生 skills，支援自然語言隱式選擇和 `$skill-name` 明確呼叫。
+這是與原版一致的破壞性行為：不會 fetch、驗證 merge、檢查 worktree 是否乾淨、保護 ignored 檔案或套用整合分支規則。執行前請先檢查倉庫狀態。
 
 ## 本機驗證
 

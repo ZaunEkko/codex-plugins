@@ -1,7 +1,7 @@
 interface:
   display_name: "Commit Changes"
-  short_description: "Create one safe repository-aware Git commit"
-  default_prompt: "Use $commit to create one safe commit for the current task."
+  short_description: "Create one commit from the current Git changes"
+  default_prompt: "Use $commit to create one commit from my current changes."
 
 policy:
   allow_implicit_invocation: true

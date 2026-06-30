@@ -1,40 +1,36 @@
 ---
 name: commit-push-pr
-description: Commit safe current changes, publish a compliant work branch to origin, and open a pull request with GitHub CLI while following repository branch policy. Use only when the user explicitly asks to create or open a pull request, or explicitly requests the full commit-push-PR workflow. Do not use for commit-only, commit-and-push-only, or branch-publishing requests without explicit PR intent.
+description: Create a branch when currently on main, create exactly one commit from the current changes, push the branch to origin, and open a pull request with GitHub CLI. Use only when the user explicitly asks to create or open a pull request, or explicitly requests the full commit-push-PR workflow. Do not use for commit-only, commit-and-push-only, or branch-publishing requests without explicit PR intent.
 ---
 
 # Commit, Push, and Open PR
 
-Complete the repository-aware branch, commit, publish, and pull request workflow without bypassing local policy.
+Adapt Anthropic's `/commit-push-pr` workflow as a native Codex skill.
 
 ## Workflow
 
-1. Read repository instructions such as `AGENTS.md` and `CONTRIBUTING.md`. Identify naming rules, the required base and integration branch, protected branches, validation commands, commit style, and PR requirements.
-2. Inspect the current branch, worktree, index, staged and unstaged diffs, recent commits, remotes, and GitHub CLI availability.
-3. Treat `main`, `master`, `dev`, `develop`, and every repository-designated protected or integration-only branch as protected.
-4. If currently on a protected branch, create a compliant work branch from the repository-required base before committing. Preserve current changes only when the branch switch is safe.
-5. If the required base or branch transition is ambiguous or risks current work, stop and explain the conflict. Do not reset, stash, rebase, or discard changes without explicit approval.
-6. Identify safe files relevant to the current task, run required validation, stage only those files, and inspect the staged diff.
-7. Create exactly one commit using the repository's established style and append:
+1. Inspect `git status`, the staged and unstaged changes with `git diff HEAD`, and the current branch with `git branch --show-current`.
+2. If the current branch is exactly `main`, create a new work branch with `git checkout -b <branch>`.
+3. Stage the current changes and create exactly one commit with an appropriate message. Append:
 
 ```text
 Co-authored-by: Codex <noreply@openai.com>
 ```
 
-8. Re-check that the current branch is a compliant work branch, then publish it to `origin` without force pushing.
-9. Open a pull request against the repository-required integration branch with GitHub CLI.
-10. Write a concise PR body containing Summary, Test plan, Notes or risks when relevant, and this exact attribution:
+4. Push the current branch to `origin`.
+5. Create a pull request with `gh pr create`.
+6. Describe the full branch in the PR body with a 1–3 bullet summary, a test-plan checklist, and:
 
 ```text
 Generated with Codex assistance.
 ```
 
-11. Report the branch, commit, PR URL, validation performed, and any skipped files.
+7. Return the pull request URL.
 
-## Safety rules
+## Boundaries
 
-- Never commit or push directly to a protected or integration-only branch.
-- Never force push, bypass required checks, overwrite remote history, or silently move changes across a risky branch transition.
-- Never stage obvious credentials, private keys, `.env` files, tokens, passwords, machine-local files, dependency directories, build output, caches, logs, or editor state.
-- Stop before publishing if `origin`, GitHub CLI authentication, the target branch, or repository policy cannot be verified.
-- Do not edit unrelated files or perform unrelated work.
+- Complete commit, push, and PR creation as one workflow; do not turn this into a push-only or PR-only path.
+- If there are no changes to commit, report that the original workflow cannot continue instead of creating an empty commit.
+- Create a new branch automatically only when the current branch is `main`; do not add other policy-driven branch transitions to the original workflow.
+- Never force push, stage obvious secrets, or perform unrelated work.
+- Stop if GitHub CLI is unavailable or unauthenticated, or if `origin` is missing.

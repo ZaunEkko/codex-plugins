@@ -1,7 +1,7 @@
 interface:
   display_name: "Clean Gone Branches"
-  short_description: "Safely remove merged local branches marked gone"
-  default_prompt: "Use $clean-gone to clean merged local branches whose upstream is gone."
+  short_description: "Force-remove local Git branches marked gone"
+  default_prompt: "Use $clean-gone to force-clean local branches whose upstream is gone."
 
 policy:
   allow_implicit_invocation: true

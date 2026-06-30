@@ -38,7 +38,7 @@
 | 插件 | 类型 | 说明 | 文档 |
 |------|------|------|------|
 | explanatory-output-style | Plugin + SessionStart Hook | 把 Claude Code 官方 explanatory-output-style 插件的解释型协作体验适配到 Codex。 | [插件文档](docs/explanatory-output-style/README.md) |
-| commit-commands | Plugin + Skills | 提供安全提交、只在明确要求时执行的 PR 发布，以及会保护 ignored 文件的陈旧分支清理工作流。 | [插件文档](docs/commit-commands/README.md) |
+| commit-commands | Plugin + Skills | 按 Anthropic 原版复刻 commit、commit-push-pr 与 force 清理 gone 分支工作流。 | [插件文档](docs/commit-commands/README.md) |
 
 ## 🚀 快速开始
 
@@ -82,7 +82,7 @@ $commit-push-pr
 $clean-gone
 ```
 
-这些 skill 不会仅因工作完成就擅自执行副作用；`commit-push-pr` 只接受明确的 PR 意图，`clean-gone` 会把 tracked、untracked 和 ignored 路径都视为本地数据，并只从已验证集成 ref 的 worktree 执行非强制分支删除。
+这些 skill 不会仅因工作完成就擅自执行副作用。工作流步骤以 Anthropic 原版为准；其中 `clean-gone` 会像原版一样执行 `git worktree remove --force` 和 `git branch -D`，调用前必须先审查仓库状态。
 
 ## 📚 插件文档
 
