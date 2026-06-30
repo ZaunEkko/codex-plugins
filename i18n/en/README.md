@@ -23,12 +23,14 @@ The goal is to package useful Codex configurations so other people can install, 
 | Plugin | Type | Description | Docs |
 |--------|------|-------------|------|
 | explanatory-output-style | Plugin + SessionStart Hook | Ports the official Claude Code explanatory-output-style experience to Codex. | [Plugin docs](docs/explanatory-output-style/README.md) |
+| commit-commands | Plugin + Skills | Matches Anthropic's commit, commit-push-pr, and force cleanup workflows for gone branches. | [Plugin docs](docs/commit-commands/README.md) |
 
 ## 🚀 Quick start
 
 ```bash
 codex plugin marketplace add ZaunEkko/codex-plugins
 codex plugin add explanatory-output-style@zaunekko
+codex plugin add commit-commands@zaunekko
 ```
 
 Plugins with command hooks must be reviewed and trusted in Codex before first use:
@@ -40,6 +42,7 @@ Plugins with command hooks must be reviewed and trusted in Codex before first us
 ## 📚 Plugin documentation
 
 - [explanatory-output-style](docs/explanatory-output-style/README.md): feature, installation, hook trust, and local validation notes.
+- [commit-commands](docs/commit-commands/README.md): commit, pull request publishing, branch cleanup, safeguards, and local validation notes.
 
 ## 🧪 Local validation
 
@@ -47,7 +50,7 @@ Plugins with command hooks must be reviewed and trusted in Codex before first us
 codex plugin list
 python -m py_compile plugins/explanatory-output-style/hooks/session_start.py
 python plugins/explanatory-output-style/hooks/session_start.py
-python -m unittest tests.test_explanatory_output_style
+python -m unittest discover -s tests
 ```
 
 ## ⚠️ Trust & Safety
@@ -55,6 +58,7 @@ python -m unittest tests.test_explanatory_output_style
 - Read plugin docs before installing.
 - Review command hooks in `/hooks`.
 - Re-trust hooks after changing them.
+- Review repository state before triggering skills that commit, push, or delete branches.
 - Do not write API keys, tokens, passwords, or machine-specific paths into hook output.
 
 ## 📄 License

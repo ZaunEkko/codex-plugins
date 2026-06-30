@@ -1,21 +1,25 @@
 {
   "name": "commit-commands",
-  "version": "1.0.0+codex.20260629172500",
-  "description": "Streamline git commit, push, pull request, and stale branch cleanup workflows for Codex.",
+  "version": "1.0.0+codex.20260630020103",
+  "description": "Codex-native skills matching Anthropic's commit, commit-push-pr, and clean_gone workflows.",
   "author": {
     "name": "ZaunEkko"
   },
+  "skills": "./skills/",
   "interface": {
     "displayName": "Commit Commands",
-    "shortDescription": "Git commit, push, PR, and stale branch cleanup commands.",
-    "longDescription": "A Codex adaptation of Anthropic's commit-commands plugin. It provides /commit, /commit-push-pr, and /clean_gone workflows, and appends Codex co-author attribution to generated commits and PR descriptions.",
+    "shortDescription": "Anthropic commit commands adapted as Codex skills.",
+    "longDescription": "A native Codex skill adaptation of Anthropic's commit-commands plugin. It preserves the original commit, commit-push-pr, and forceful clean_gone workflows while adding Codex-native invocation and Codex attribution.",
     "developerName": "ZaunEkko",
     "category": "Productivity",
     "capabilities": [
-      "Commands"
+      "Skills",
+      "Git Workflows"
     ],
     "defaultPrompt": [
-      "When using commit-commands, preserve the repository's commit style, avoid committing secrets, and append Codex attribution with: Co-authored-by: Codex <noreply@openai.com>."
+      "Create one commit for my current changes.",
+      "Commit my changes, push the branch, and open a pull request.",
+      "Force-clean local branches whose upstream is gone."
     ]
   }
 }

@@ -1,97 +1,44 @@
 # Commit Commands Plugin
 
-Streamline everyday git workflows in Codex with slash commands for committing, publishing pull requests, and cleaning up stale local branches.
+[简体中文](../../docs/commit-commands/README.md) · [English](../../i18n/en/docs/commit-commands/README.md) · [繁體中文](../../i18n/zh-TW/docs/commit-commands/README.md) · [日本語](../../i18n/ja/docs/commit-commands/README.md) · [한국어](../../i18n/ko/docs/commit-commands/README.md)
 
-This is a Codex adaptation of Anthropic's `commit-commands` plugin. It keeps the same core workflow shape while using Codex attribution:
+A Codex-native adaptation of Anthropic's original `commit-commands` plugin:
+
+```text
+$commit
+$commit-push-pr
+$clean-gone
+```
+
+The workflow steps follow the [Anthropic original](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/commit-commands). Codex-specific differences are limited to native skill packaging, explicit-intent implicit selection, `$skill-name` invocation, and Codex attribution.
+
+## Skills
+
+### `$commit`
+
+Inspects `git status`, `git diff HEAD`, the current branch, and the latest ten commits. It stages the current changes and creates exactly one commit with:
 
 ```text
 Co-authored-by: Codex <noreply@openai.com>
 ```
 
-## Commands
+It does not push or open a pull request. If there are no changes, it reports that instead of creating an empty commit.
 
-### `/commit`
+### `$commit-push-pr`
 
-Creates one git commit with an automatically generated commit message based on staged and unstaged changes.
+Inspects the current status, diff, and branch. If the current branch is exactly `main`, it creates a new branch. It then creates exactly one commit, pushes the branch to `origin`, and opens a pull request with `gh pr create`.
 
-What it does:
+This skill requires explicit PR intent. A commit-and-push-only request does not authorize PR creation. Like the original, it has no publish-without-a-new-commit path and does not create policy-driven branches for names other than `main`.
 
-1. Analyzes current git status.
-2. Reviews staged and unstaged changes.
-3. Checks recent commit messages to match the repository style.
-4. Stages relevant safe files.
-5. Creates one commit.
-6. Appends Codex co-author attribution.
+### `$clean-gone`
 
-Usage:
+Uses `git branch -v` and `git worktree list` to find branches marked `[gone]`. For every candidate, it force-removes an associated non-main worktree with `git worktree remove --force`, then force-deletes the branch with `git branch -D`.
 
-```text
-/commit
-```
+This deliberately matches the original destructive behavior. It does not fetch, verify merges, inspect worktree cleanliness, protect ignored files, or apply integration-branch rules. Review repository state before invoking it.
 
-### `/commit-push-pr`
+## Implicit invocation
 
-Completes a branch-to-PR workflow.
-
-What it does:
-
-1. Creates a new feature branch if currently on `main` or `master`.
-2. Stages and commits relevant safe changes.
-3. Publishes the branch to `origin`.
-4. Opens a pull request with the GitHub CLI.
-5. Adds a concise PR body with summary, test plan, notes/risks, and Codex attribution.
-
-Usage:
-
-```text
-/commit-push-pr
-```
-
-Requirements:
-
-- Git must be installed and configured.
-- GitHub CLI must be installed and authenticated.
-- The repository should have an `origin` remote.
-
-### `/clean_gone`
-
-Cleans up local branches whose upstream branches were removed from the remote.
-
-What it does:
-
-1. Runs a prune fetch.
-2. Lists local branches with `[gone]` status.
-3. Removes associated worktrees when needed.
-4. Deletes stale local branches.
-
-Usage:
-
-```text
-/clean_gone
-```
-
-## Guardrails
-
-The commands instruct Codex to skip local-only files, generated output, dependency folders, caches, logs, and environment/config files that do not belong in the repository.
-
-Always review the resulting commit or PR before merging.
-
-## Attribution
-
-Generated commits should include:
-
-```text
-Co-authored-by: Codex <noreply@openai.com>
-```
-
-This email was chosen because `openai/codex` uses `noreply@openai.com` for Codex git baseline commits.
-
-## Relationship to Claude plugin
-
-This plugin intentionally mirrors the public Anthropic commit commands workflow:
-
-- `/commit`
-- `/commit-push-pr`
-- `/clean_gone`
-
-The command behavior is adapted for Codex and this repository's `.codex-plugin` packaging format.
+- "Commit these changes" can select `commit`.
+- "Commit these changes, push, and open a PR" can select `commit-push-pr`.
+- "Clean all gone branches" can select `clean-gone`.
+- "The implementation is finished" does not authorize any Git side effect.
