@@ -1,56 +1,60 @@
-# Commit Commands
+# commit-commands
 
-`commit-commands` 是一个把常用 Git 提交流程封装成 Codex slash commands 的插件。
+[简体中文](README.md) · [English](../../i18n/en/docs/commit-commands/README.md) · [繁體中文](../../i18n/zh-TW/docs/commit-commands/README.md) · [日本語](../../i18n/ja/docs/commit-commands/README.md) · [한국어](../../i18n/ko/docs/commit-commands/README.md)
 
-它适配了 Anthropic `commit-commands` 的核心体验：
+`commit-commands` 将 [Anthropic 官方原版](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/commit-commands) 的三个 slash command 适配为原生 Codex skill：
 
 ```text
-/commit
-/commit-push-pr
-/clean_gone
+$commit
+$commit-push-pr
+$clean-gone
 ```
 
-## 安装
+工作流步骤以原版为准。Codex 适配差异只包括原生 skill 结构、明确意图的自动选择、`$skill-name` 显式入口和 Codex attribution。
+
+## 安装与启用
 
 ```bash
 codex plugin marketplace add ZaunEkko/codex-plugins
 codex plugin add commit-commands@zaunekko
 ```
 
-## `/commit`
+安装或更新后请新开 Codex thread，使新的 skill 元数据进入会话。
 
-用于日常开发中快速提交当前改动。
+## 自动选择示例
 
-它会让 Codex 查看工作区、diff 和最近 commit 风格，生成合适的提交信息，stage 相关文件，并创建单个 commit。
+- “提交这些改动”可以自动选择 `commit`。
+- “提交这些改动、推送并创建 PR”可以自动选择 `commit-push-pr`。
+- “清理所有 gone 分支”可以自动选择 `clean-gone`。
+- “功能已经完成”不会自行触发任何 Git 副作用。
 
-默认追加：
+## `$commit`
 
-```text
-Co-authored-by: Codex <noreply@openai.com>
-```
-
-## `/commit-push-pr`
-
-用于功能完成后发布分支并打开 PR。
-
-它会让 Codex 在需要时创建 feature branch、提交当前改动、发布分支，并用 GitHub CLI 打开 PR。
-
-## `/clean_gone`
-
-用于清理远程已删除但本地仍存在的 stale branch。
-
-它会先更新远程分支信息，再删除标记为 `[gone]` 的本地分支，并在需要时处理关联 worktree。
-
-## 归因
-
-本插件默认使用：
+检查 `git status`、`git diff HEAD`、当前分支和最近十条提交，暂存当前改动并创建一个 commit。生成的提交会追加：
 
 ```text
 Co-authored-by: Codex <noreply@openai.com>
 ```
 
-该地址来自 `openai/codex` 仓库中的 Codex baseline git signature。
+该 skill 不会推送或创建 PR；没有改动时也不会创建空提交。
 
-## 注意
+## `$commit-push-pr`
 
-这个插件会触发本地 Git 工作流。使用前请确认当前目录是正确仓库，并在合并 PR 前人工 review。
+检查当前状态、diff 和分支。只有当前分支恰好是 `main` 时才创建新分支，然后创建一个 commit、推送到 `origin`，并使用 `gh pr create` 创建 PR。
+
+该 skill 只在用户明确要求 PR 时触发。与原版一样，它不支持“没有新 commit 也发布 PR”，也不会因为其他分支名称不符合仓库策略而自动迁移分支。
+
+需要已安装并登录 GitHub CLI，仓库还需要配置 `origin` remote。
+
+## `$clean-gone`
+
+使用 `git branch -v` 和 `git worktree list` 查找标记为 `[gone]` 的分支。对每个候选项，先使用 `git worktree remove --force` 强制移除关联的非主 worktree，再使用 `git branch -D` 强制删除分支。
+
+这是与原版一致的破坏性行为：不会自动 fetch，不验证是否已合并，不检查 worktree 是否干净，也不保护 ignored 文件或集成分支。调用前必须自行确认仓库状态。
+
+## 本地验证
+
+```bash
+python -m unittest discover -s tests
+codex plugin list
+```
