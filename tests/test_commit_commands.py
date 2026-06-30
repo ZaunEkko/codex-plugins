@@ -47,28 +47,39 @@ class CommitCommandsPluginTests(unittest.TestCase):
                 self.assertIn("allow_implicit_invocation: true", metadata_text)
         self.assertFalse((PLUGIN_ROOT / "commands").exists())
 
-    def test_codex_attribution_is_configured(self):
+    def test_commit_matches_upstream_workflow_with_codex_attribution(self):
         text = (SKILLS["commit"] / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("`git status`", text)
+        self.assertIn("`git diff HEAD`", text)
+        self.assertIn("`git branch --show-current`", text)
+        self.assertIn("`git log --oneline -10`", text)
+        self.assertIn("Create exactly one commit", text)
         self.assertIn("noreply@openai.com", text)
         self.assertIn("Do not push", text)
 
-    def test_commit_push_pr_protects_integration_branches(self):
+    def test_commit_push_pr_matches_upstream_workflow(self):
         text = (SKILLS["commit-push-pr"] / "SKILL.md").read_text(encoding="utf-8")
-        self.assertIn("`dev`", text)
-        self.assertIn("repository instructions", text)
-        self.assertIn("Never commit or push directly", text)
-        self.assertIn("repository-required integration branch", text)
+        self.assertIn("current branch is exactly `main`", text)
+        self.assertIn("git checkout -b <branch>", text)
+        self.assertIn("create exactly one commit", text)
+        self.assertIn("Push the current branch to `origin`", text)
+        self.assertIn("gh pr create", text)
         self.assertIn("commit-and-push-only", text)
         self.assertIn("branch-publishing requests without explicit PR intent", text)
+        self.assertNotIn("`dev`", text)
+        self.assertNotIn("repository-required integration branch", text)
 
-    def test_clean_gone_preserves_unsafe_candidates(self):
+    def test_clean_gone_matches_upstream_force_cleanup(self):
         text = (SKILLS["clean-gone"] / "SKILL.md").read_text(encoding="utf-8")
-        self.assertIn("git merge-base --is-ancestor", text)
-        self.assertIn("git -C <path> status --short --ignored=matching", text)
-        self.assertIn("git -C <integration-path> branch -d <branch>", text)
-        self.assertIn("exact approved integration ref", text)
-        self.assertIn("tracked, untracked, or ignored path", text)
-        self.assertIn("Never use `git branch -D`", text)
+        self.assertIn("git branch -v", text)
+        self.assertIn("git worktree list", text)
+        self.assertIn("git worktree remove --force <path>", text)
+        self.assertIn("git branch -D <branch>", text)
+        self.assertIn("do not add merge-base", text)
+        self.assertIn("Do not run `git fetch`", text)
+        self.assertNotIn("--ignored=matching", text)
+        self.assertNotIn("git merge-base --is-ancestor", text)
+        self.assertNotIn("git branch -d <branch>", text)
         self.assertIn("Never use merely because stale branches exist", text)
 
     def test_marketplace_registers_plugin(self):
@@ -83,7 +94,7 @@ class CommitCommandsPluginTests(unittest.TestCase):
                 text = path.read_text(encoding="utf-8")
                 self.assertIn("$commit-push-pr", text)
                 self.assertIn("$clean-gone", text)
-                self.assertIn("--ignored=matching", text)
+                self.assertIn("git branch -D", text)
                 self.assertNotIn("/clean_gone", text)
 
     def test_repository_readmes_register_plugin(self):
@@ -93,7 +104,7 @@ class CommitCommandsPluginTests(unittest.TestCase):
                 self.assertIn("commit-commands@zaunekko", text)
                 self.assertIn("docs/commit-commands/README.md", text)
                 self.assertIn("Plugin + Skills", text)
-                self.assertIn("ignored", text)
+                self.assertIn("force", text.lower())
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 interface:
   display_name: "Commit, Push, and Open PR"
-  short_description: "Safely publish a work branch and open a PR"
-  default_prompt: "Use $commit-push-pr to commit changes, publish the branch, and open a pull request."
+  short_description: "Commit, push the branch, and open a pull request"
+  default_prompt: "Use $commit-push-pr to commit my changes, push the branch, and open a pull request."
 
 policy:
   allow_implicit_invocation: true
