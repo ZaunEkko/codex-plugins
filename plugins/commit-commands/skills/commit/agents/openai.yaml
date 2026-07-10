@@ -1,6 +1,6 @@
 interface:
   display_name: "Commit Changes"
-  short_description: "Create one commit with current Codex model attribution"
+  short_description: "Commit with current Codex model and effort attribution"
   default_prompt: "Use $commit to create one commit from my current changes."
 
 policy:

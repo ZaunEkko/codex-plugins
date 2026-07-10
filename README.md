@@ -38,7 +38,7 @@
 | 插件 | 类型 | 说明 | 文档 |
 |------|------|------|------|
 | explanatory-output-style | Plugin + SessionStart Hook | 把 Claude Code 官方 explanatory-output-style 插件的解释型协作体验适配到 Codex。 | [插件文档](docs/explanatory-output-style/README.md) |
-| commit-commands | Plugin + Skills + UserPromptSubmit Hook | 按 Anthropic 原版提供 Git 工作流，为新提交加入当前 Codex 模型 attribution，并 force 清理 gone 分支。 | [插件文档](docs/commit-commands/README.md) |
+| commit-commands | Plugin + Skills + UserPromptSubmit Hook | 为新提交加入当前 Codex 模型与思考强度 attribution，并 force 清理 gone 分支。 | [插件文档](docs/commit-commands/README.md) |
 
 ## 🚀 快速开始
 
@@ -82,7 +82,7 @@ $commit-push-pr
 $clean-gone
 ```
 
-在每个用户 turn 开始时，插件 hook 会读取 Codex 提供的当前模型，并让 `$commit` 与 `$commit-push-pr` 写入固定的 `Generated with Codex` 标识和动态 `Model:` 行。安装或更新后需要在 `/hooks` 中重新审查并信任该 hook。
+在每个用户 turn 开始时，插件 hook 会解析当前 Codex 模型与思考强度，并让 `$commit` 与 `$commit-push-pr` 写入固定的 `Generated with Codex` 标识和动态 `Model: <model> <effort>` 行。安装或更新后需要在 `/hooks` 中重新审查并信任该 hook。
 
 这些 skill 不会仅因工作完成就擅自执行副作用。工作流步骤以 Anthropic 原版为准；其中 `clean-gone` 会像原版一样执行 `git worktree remove --force` 和 `git branch -D`，调用前必须先审查仓库状态。
 

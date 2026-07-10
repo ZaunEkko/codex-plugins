@@ -21,7 +21,7 @@
 | 플러그인 | 유형 | 설명 | 문서 |
 |----------|------|------|------|
 | explanatory-output-style | Plugin + SessionStart Hook | Claude Code 공식 explanatory-output-style 경험을 Codex에 맞게 적용합니다. | [플러그인 문서](docs/explanatory-output-style/README.md) |
-| commit-commands | Plugin + Skills + UserPromptSubmit Hook | commit 에 현재 Codex 모델을 기록하고 Anthropic 원본의 gone 브랜치 force 정리를 유지합니다. | [플러그인 문서](docs/commit-commands/README.md) |
+| commit-commands | Plugin + Skills + UserPromptSubmit Hook | commit 에 현재 Codex 모델과 reasoning effort 를 기록하고 force 정리를 유지합니다. | [플러그인 문서](docs/commit-commands/README.md) |
 
 ## 🚀 빠른 시작
 

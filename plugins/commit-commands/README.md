@@ -1,4 +1,4 @@
-# Commit Commands with Dynamic Model Attribution
+# Commit Commands with Dynamic Model and Effort Attribution
 
 [简体中文](../../docs/commit-commands/README.md) · [English](../../i18n/en/docs/commit-commands/README.md) · [繁體中文](../../i18n/zh-TW/docs/commit-commands/README.md) · [日本語](../../i18n/ja/docs/commit-commands/README.md) · [한국어](../../i18n/ko/docs/commit-commands/README.md)
 
@@ -10,9 +10,9 @@ $commit-push-pr
 $clean-gone
 ```
 
-The workflow steps follow the [Anthropic original](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/commit-commands). Codex-specific differences include native skill packaging, explicit-intent implicit selection, `$skill-name` invocation, and a `UserPromptSubmit` hook that provides the active Codex model to the two commit-producing skills.
+The workflow steps follow the [Anthropic original](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/commit-commands). Codex-specific differences include native skill packaging, explicit-intent implicit selection, `$skill-name` invocation, and a `UserPromptSubmit` hook that provides the active Codex model and reasoning effort to the two commit-producing skills.
 
-Review and trust the plugin hook with `/hooks` after installation or an update. Codex supplies the active model slug directly to each command hook, so this plugin does not parse transcript files or infer the model from user configuration.
+Review and trust the plugin hook with `/hooks` after installation or an update. Codex supplies the active model slug directly, but the current hook schema does not expose reasoning effort. The plugin therefore matches the current `turn_id` and model against the latest `turn_context` near the end of `transcript_path`, then falls back to `model_reasoning_effort` only when the user config targets the same model. It extracts only attribution fields and never copies or stores prompt content.
 
 ## Skills
 
@@ -22,12 +22,12 @@ Inspects `git status`, `git diff HEAD`, the current branch, and the latest ten c
 
 ```text
 Generated with [Codex](https://chatgpt.com/codex)
-Model: <active-model-slug>
+Model: <active-model-slug> <active-reasoning-effort>
 
 Co-authored-by: Codex <noreply@openai.com>
 ```
 
-The hook refreshes the model metadata for every user turn, including the first prompt after a model change. If the hook context is missing or the model is unavailable, the skill stops before staging or committing instead of guessing. It does not push or open a pull request. If there are no changes, it reports that instead of creating an empty commit.
+The hook refreshes metadata for every user turn, including the first prompt after a model or effort change. Transcript parsing is isolated and best-effort because Codex does not guarantee that format. If effort cannot be resolved, the commit keeps only the model; if the model context is missing, the skill stops before staging or committing. It does not push or open a pull request. If there are no changes, it reports that instead of creating an empty commit.
 
 ### `$commit-push-pr`
 

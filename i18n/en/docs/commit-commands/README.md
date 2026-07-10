@@ -10,7 +10,7 @@ $commit-push-pr
 $clean-gone
 ```
 
-Workflow steps follow the original. Codex-specific differences include native skill packaging, explicit-intent implicit selection, `$skill-name` invocation, and a `UserPromptSubmit` hook that dynamically provides the active Codex model for commit attribution.
+Workflow steps follow the original. Codex-specific differences include native skill packaging, explicit-intent implicit selection, `$skill-name` invocation, and a `UserPromptSubmit` hook that dynamically provides the active Codex model and reasoning effort for commit attribution.
 
 ## Installation
 
@@ -34,12 +34,12 @@ Inspects `git status`, `git diff HEAD`, the current branch, and the latest ten c
 
 ```text
 Generated with [Codex](https://chatgpt.com/codex)
-Model: <active-model-slug>
+Model: <active-model-slug> <active-reasoning-effort>
 
 Co-authored-by: Codex <noreply@openai.com>
 ```
 
-Codex supplies the active model slug directly to every command hook. The plugin refreshes that context on each `UserPromptSubmit`, so the next commit after a model switch uses the new model. It does not parse the unstable transcript format or infer the model from configuration. If the hook is untrusted, its context is missing, or the model is unavailable, the skill stops before staging or committing.
+Codex supplies the active model slug directly, but the current hook schema does not expose reasoning effort. The plugin exactly matches the current `turn_id` and model against a `turn_context` near the end of `transcript_path`; if that fails, it uses `model_reasoning_effort` only when user config targets the same model. It extracts only attribution fields and never copies or stores prompt content. Because transcript format is not stable, failure omits the effort suffix; an untrusted hook or missing model context still stops the skill before staging or committing.
 
 It does not push or open a PR, and it does not create an empty commit when there are no changes.
 
@@ -61,7 +61,7 @@ This deliberately matches the original destructive behavior: it does not fetch, 
 
 ```bash
 python -m py_compile plugins/commit-commands/hooks/model_context.py
-'{"hook_event_name":"UserPromptSubmit","model":"gpt-5.6-sol"}' | python plugins/commit-commands/hooks/model_context.py
+'{"hook_event_name":"UserPromptSubmit","model":"gpt-5.6-sol","effort":"xhigh"}' | python plugins/commit-commands/hooks/model_context.py
 python -m unittest discover -s tests
 codex plugin list
 ```

@@ -10,7 +10,7 @@ $commit-push-pr
 $clean-gone
 ```
 
-工作流程步驟以原版為準。Codex 差異包括原生 skill 結構、明確意圖的自動選擇、`$skill-name` 入口，以及透過 `UserPromptSubmit` hook 動態提供目前 Codex 模型。
+工作流程步驟以原版為準。Codex 差異包括原生 skill 結構、明確意圖的自動選擇、`$skill-name` 入口，以及透過 `UserPromptSubmit` hook 動態提供目前 Codex 模型與思考強度。
 
 ## 安裝
 
@@ -34,12 +34,12 @@ codex plugin add commit-commands@zaunekko
 
 ```text
 Generated with [Codex](https://chatgpt.com/codex)
-Model: <active-model-slug>
+Model: <active-model-slug> <active-reasoning-effort>
 
 Co-authored-by: Codex <noreply@openai.com>
 ```
 
-Codex 會將目前模型 slug 直接傳給每個 command hook。插件在每個 `UserPromptSubmit` 重新整理模型上下文，因此切換模型後的下一次提交會使用新模型；它不會解析不穩定的 transcript，也不會從設定猜測模型。hook 未受信任、上下文缺失或模型不可用時，skill 會在 stage 或 commit 前停止。
+Codex 會直接提供目前模型 slug，但現行 hook schema 不提供思考強度。插件會以目前 `turn_id` 與模型精確比對 `transcript_path` 尾端的 `turn_context`；若失敗，只有使用者設定指向相同模型時才回退到 `model_reasoning_effort`。解析器只提取 attribution 欄位，不複製或保存 prompt。因 transcript 格式並不穩定，失敗時只省略強度後綴；hook 未受信任或模型 context 缺失時，skill 才會在 stage 或 commit 前停止。
 
 不會推送、建立 PR 或在沒有改動時建立空 commit。
 
@@ -61,7 +61,7 @@ Codex 會將目前模型 slug 直接傳給每個 command hook。插件在每個 
 
 ```bash
 python -m py_compile plugins/commit-commands/hooks/model_context.py
-'{"hook_event_name":"UserPromptSubmit","model":"gpt-5.6-sol"}' | python plugins/commit-commands/hooks/model_context.py
+'{"hook_event_name":"UserPromptSubmit","model":"gpt-5.6-sol","effort":"xhigh"}' | python plugins/commit-commands/hooks/model_context.py
 python -m unittest discover -s tests
 codex plugin list
 ```
