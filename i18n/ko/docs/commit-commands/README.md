@@ -10,7 +10,7 @@ $commit-push-pr
 $clean-gone
 ```
 
-워크플로 단계는 원본을 따릅니다. Codex 전용 차이는 네이티브 skill 구조, 명확한 의도에 따른 자동 선택, `$skill-name` 호출, Codex attribution 뿐입니다.
+워크플로 단계는 원본을 따릅니다. Codex 전용 차이에는 네이티브 skill 구조, 명확한 의도에 따른 자동 선택, `$skill-name` 호출, 현재 Codex 모델을 동적으로 제공하는 `UserPromptSubmit` hook 이 포함됩니다.
 
 ## 설치
 
@@ -19,7 +19,7 @@ codex plugin marketplace add ZaunEkko/codex-plugins
 codex plugin add commit-commands@zaunekko
 ```
 
-설치 또는 업데이트 후 새 Codex thread 를 여세요.
+설치 또는 업데이트 후 `/hooks` 에서 `commit-commands` hook 을 검토하고 trust 한 다음 새 Codex thread 를 여세요.
 
 ## 자동 선택 예시
 
@@ -33,8 +33,13 @@ codex plugin add commit-commands@zaunekko
 `git status`, `git diff HEAD`, 현재 브랜치, 최근 commit 10개를 확인하고 현재 변경을 stage 한 뒤 하나의 commit 을 만듭니다.
 
 ```text
+Generated with [Codex](https://chatgpt.com/codex)
+Model: <active-model-slug>
+
 Co-authored-by: Codex <noreply@openai.com>
 ```
+
+Codex 는 현재 모델 slug 를 각 command hook 에 직접 전달합니다. 플러그인은 `UserPromptSubmit` 마다 모델 context 를 갱신하므로 모델 전환 후 다음 commit 은 새 모델을 사용합니다. 불안정한 transcript 를 파싱하거나 설정에서 모델을 추측하지 않습니다. hook 이 trust 되지 않았거나 context 가 없거나 모델을 사용할 수 없으면 skill 은 stage 또는 commit 전에 중지합니다.
 
 push 또는 PR 생성을 하지 않으며 변경이 없으면 빈 commit 도 만들지 않습니다.
 
@@ -55,6 +60,8 @@ GitHub CLI 설치와 로그인, 그리고 `origin` remote 가 필요합니다.
 ## 로컬 검증
 
 ```bash
+python -m py_compile plugins/commit-commands/hooks/model_context.py
+'{"hook_event_name":"UserPromptSubmit","model":"gpt-5.6-sol"}' | python plugins/commit-commands/hooks/model_context.py
 python -m unittest discover -s tests
 codex plugin list
 ```

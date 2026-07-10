@@ -10,7 +10,7 @@ $commit-push-pr
 $clean-gone
 ```
 
-工作流程步驟以原版為準。Codex 差異只限於原生 skill 結構、明確意圖的自動選擇、`$skill-name` 入口與 Codex attribution。
+工作流程步驟以原版為準。Codex 差異包括原生 skill 結構、明確意圖的自動選擇、`$skill-name` 入口，以及透過 `UserPromptSubmit` hook 動態提供目前 Codex 模型。
 
 ## 安裝
 
@@ -19,7 +19,7 @@ codex plugin marketplace add ZaunEkko/codex-plugins
 codex plugin add commit-commands@zaunekko
 ```
 
-安裝或更新後請開啟新的 Codex thread。
+安裝或更新後，請先在 `/hooks` 中審查並信任 `commit-commands` hook，再開啟新的 Codex thread。
 
 ## 自動選擇範例
 
@@ -33,8 +33,13 @@ codex plugin add commit-commands@zaunekko
 檢查 `git status`、`git diff HEAD`、目前分支與最近十筆提交，暫存目前改動並建立一個 commit，加入：
 
 ```text
+Generated with [Codex](https://chatgpt.com/codex)
+Model: <active-model-slug>
+
 Co-authored-by: Codex <noreply@openai.com>
 ```
+
+Codex 會將目前模型 slug 直接傳給每個 command hook。插件在每個 `UserPromptSubmit` 重新整理模型上下文，因此切換模型後的下一次提交會使用新模型；它不會解析不穩定的 transcript，也不會從設定猜測模型。hook 未受信任、上下文缺失或模型不可用時，skill 會在 stage 或 commit 前停止。
 
 不會推送、建立 PR 或在沒有改動時建立空 commit。
 
@@ -55,6 +60,8 @@ Co-authored-by: Codex <noreply@openai.com>
 ## 本機驗證
 
 ```bash
+python -m py_compile plugins/commit-commands/hooks/model_context.py
+'{"hook_event_name":"UserPromptSubmit","model":"gpt-5.6-sol"}' | python plugins/commit-commands/hooks/model_context.py
 python -m unittest discover -s tests
 codex plugin list
 ```
