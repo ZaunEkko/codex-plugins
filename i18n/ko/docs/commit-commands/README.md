@@ -10,7 +10,7 @@ $commit-push-pr
 $clean-gone
 ```
 
-워크플로 단계는 원본을 따릅니다. Codex 전용 차이에는 네이티브 skill 구조, 명확한 의도에 따른 자동 선택, `$skill-name` 호출, 현재 Codex 모델을 동적으로 제공하는 `UserPromptSubmit` hook 이 포함됩니다.
+워크플로 단계는 원본을 따릅니다. Codex 전용 차이에는 네이티브 skill 구조, 명확한 의도에 따른 자동 선택, `$skill-name` 호출, 현재 Codex 모델과 reasoning effort 를 동적으로 제공하는 `UserPromptSubmit` hook 이 포함됩니다.
 
 ## 설치
 
@@ -34,12 +34,12 @@ codex plugin add commit-commands@zaunekko
 
 ```text
 Generated with [Codex](https://chatgpt.com/codex)
-Model: <active-model-slug>
+Model: <active-model-slug> <active-reasoning-effort>
 
 Co-authored-by: Codex <noreply@openai.com>
 ```
 
-Codex 는 현재 모델 slug 를 각 command hook 에 직접 전달합니다. 플러그인은 `UserPromptSubmit` 마다 모델 context 를 갱신하므로 모델 전환 후 다음 commit 은 새 모델을 사용합니다. 불안정한 transcript 를 파싱하거나 설정에서 모델을 추측하지 않습니다. hook 이 trust 되지 않았거나 context 가 없거나 모델을 사용할 수 없으면 skill 은 stage 또는 commit 전에 중지합니다.
+Codex 는 현재 모델 slug 를 직접 전달하지만 현행 hook schema 는 reasoning effort 를 제공하지 않습니다. 플러그인은 현재 `turn_id` 와 모델을 `transcript_path` 끝의 `turn_context` 와 정확히 맞추고, 실패하면 사용자 설정이 같은 모델을 가리킬 때만 `model_reasoning_effort` 로 fallback 합니다. attribution 필드만 추출하며 prompt 를 복사하거나 저장하지 않습니다. transcript 형식이 안정적이지 않으므로 실패하면 effort suffix 만 생략합니다. hook 이 trust 되지 않았거나 모델 context 가 없으면 stage 또는 commit 전에 중지합니다.
 
 push 또는 PR 생성을 하지 않으며 변경이 없으면 빈 commit 도 만들지 않습니다.
 
@@ -61,7 +61,7 @@ GitHub CLI 설치와 로그인, 그리고 `origin` remote 가 필요합니다.
 
 ```bash
 python -m py_compile plugins/commit-commands/hooks/model_context.py
-'{"hook_event_name":"UserPromptSubmit","model":"gpt-5.6-sol"}' | python plugins/commit-commands/hooks/model_context.py
+'{"hook_event_name":"UserPromptSubmit","model":"gpt-5.6-sol","effort":"xhigh"}' | python plugins/commit-commands/hooks/model_context.py
 python -m unittest discover -s tests
 codex plugin list
 ```
