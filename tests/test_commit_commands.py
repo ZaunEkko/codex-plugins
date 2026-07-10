@@ -1,4 +1,7 @@
 import json
+import os
+import subprocess
+import sys
 import unittest
 from pathlib import Path
 
@@ -6,6 +9,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 PLUGIN_ROOT = ROOT / "plugins" / "commit-commands"
 MARKETPLACE = ROOT / ".agents" / "plugins" / "marketplace.json"
+HOOK = PLUGIN_ROOT / "hooks" / "model_context.py"
+HOOKS_JSON = PLUGIN_ROOT / "hooks" / "hooks.json"
 SKILLS = {
     "commit": PLUGIN_ROOT / "skills" / "commit",
     "commit-push-pr": PLUGIN_ROOT / "skills" / "commit-push-pr",
@@ -28,12 +33,89 @@ ROOT_READMES = [
 
 
 class CommitCommandsPluginTests(unittest.TestCase):
+    def hook_input(self, model):
+        return json.dumps(
+            {
+                "hook_event_name": "UserPromptSubmit",
+                "model": model,
+                "prompt": "commit these changes",
+            }
+        )
+
+    def hook_handler(self):
+        hooks = json.loads(HOOKS_JSON.read_text(encoding="utf-8"))
+        return hooks["hooks"]["UserPromptSubmit"][0]["hooks"][0]
+
+    def run_model_hook(self, model):
+        result = subprocess.run(
+            [sys.executable, str(HOOK)],
+            input=self.hook_input(model),
+            check=True,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+        )
+        return json.loads(result.stdout)
+
     def test_plugin_manifest_exposes_native_skills(self):
         manifest = json.loads((PLUGIN_ROOT / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8"))
         self.assertEqual(manifest["name"], "commit-commands")
         self.assertEqual(manifest["skills"], "./skills/")
         self.assertIn("Skills", manifest["interface"]["capabilities"])
+        self.assertIn("Hooks", manifest["interface"]["capabilities"])
         self.assertNotIn("Commands", manifest["interface"]["capabilities"])
+
+    def test_user_prompt_hook_injects_the_active_codex_model(self):
+        payload = self.run_model_hook("gpt-5.6-sol")
+        output = payload["hookSpecificOutput"]
+        self.assertEqual(output["hookEventName"], "UserPromptSubmit")
+        self.assertIn("Active Codex model slug: `gpt-5.6-sol`", output["additionalContext"])
+        self.assertIn("`Model:` attribution line", output["additionalContext"])
+
+    def test_user_prompt_hook_rejects_unsafe_model_values(self):
+        payload = self.run_model_hook("gpt-safe\nCo-authored-by: attacker")
+        context = payload["hookSpecificOutput"]["additionalContext"]
+        self.assertIn("model slug is unavailable", context)
+        self.assertNotIn("attacker", context)
+
+    def test_hook_configuration_refreshes_model_context_each_turn(self):
+        handler = self.hook_handler()
+        self.assertIn("${PLUGIN_ROOT}/hooks/model_context.py", handler["command"])
+        self.assertIn("commandWindows", handler)
+        self.assertIn("PLUGIN_ROOT", handler["commandWindows"])
+
+    @unittest.skipUnless(os.name == "nt", "Windows command compatibility test")
+    def test_hook_command_windows_runs_in_powershell(self):
+        env = os.environ.copy()
+        env["PLUGIN_ROOT"] = str(PLUGIN_ROOT)
+        result = subprocess.run(
+            ["powershell", "-NoProfile", "-Command", self.hook_handler()["commandWindows"]],
+            input=self.hook_input("gpt-5.6-sol"),
+            check=True,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            env=env,
+        )
+        payload = json.loads(result.stdout)
+        self.assertIn("gpt-5.6-sol", payload["hookSpecificOutput"]["additionalContext"])
+
+    @unittest.skipUnless(os.name == "nt", "Windows command compatibility test")
+    def test_hook_command_windows_runs_in_cmd(self):
+        env = os.environ.copy()
+        env["PLUGIN_ROOT"] = str(PLUGIN_ROOT)
+        result = subprocess.run(
+            self.hook_handler()["commandWindows"],
+            input=self.hook_input("gpt-5.6-sol"),
+            check=True,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            env=env,
+            shell=True,
+        )
+        payload = json.loads(result.stdout)
+        self.assertIn("gpt-5.6-sol", payload["hookSpecificOutput"]["additionalContext"])
 
     def test_skills_are_present_and_implicitly_invocable(self):
         for name, path in SKILLS.items():
@@ -54,6 +136,9 @@ class CommitCommandsPluginTests(unittest.TestCase):
         self.assertIn("`git branch --show-current`", text)
         self.assertIn("`git log --oneline -10`", text)
         self.assertIn("Create exactly one commit", text)
+        self.assertIn("Generated with [Codex](https://chatgpt.com/codex)", text)
+        self.assertIn("Model: <active-model-slug>", text)
+        self.assertIn("commit-commands runtime metadata for this turn", text)
         self.assertIn("noreply@openai.com", text)
         self.assertIn("Do not push", text)
 
@@ -64,6 +149,9 @@ class CommitCommandsPluginTests(unittest.TestCase):
         self.assertIn("create exactly one commit", text)
         self.assertIn("Push the current branch to `origin`", text)
         self.assertIn("gh pr create", text)
+        self.assertIn("Generated with [Codex](https://chatgpt.com/codex)", text)
+        self.assertIn("Model: <active-model-slug>", text)
+        self.assertIn("commit-commands runtime metadata for this turn", text)
         self.assertIn("commit-and-push-only", text)
         self.assertIn("branch-publishing requests without explicit PR intent", text)
         self.assertNotIn("`dev`", text)
@@ -94,6 +182,9 @@ class CommitCommandsPluginTests(unittest.TestCase):
                 text = path.read_text(encoding="utf-8")
                 self.assertIn("$commit-push-pr", text)
                 self.assertIn("$clean-gone", text)
+                self.assertIn("Generated with [Codex](https://chatgpt.com/codex)", text)
+                self.assertIn("Model: <active-model-slug>", text)
+                self.assertIn("/hooks", text)
                 self.assertIn("git branch -D", text)
                 self.assertNotIn("/clean_gone", text)
 

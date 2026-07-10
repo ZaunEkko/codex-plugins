@@ -1,6 +1,6 @@
 interface:
   display_name: "Commit Changes"
-  short_description: "Create one commit from the current Git changes"
+  short_description: "Create one commit with current Codex model attribution"
   default_prompt: "Use $commit to create one commit from my current changes."
 
 policy:
