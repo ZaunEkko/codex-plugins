@@ -21,7 +21,7 @@
 | プラグイン | 種類 | 説明 | ドキュメント |
 |------------|------|------|--------------|
 | explanatory-output-style | Plugin + SessionStart Hook | Claude Code 公式の explanatory-output-style 体験を Codex に適配します。 | [プラグイン docs](docs/explanatory-output-style/README.md) |
-| commit-commands | Plugin + Skills | Anthropic 原版の commit、commit-push-pr、gone ブランチの force cleanup を提供します。 | [プラグイン docs](docs/commit-commands/README.md) |
+| commit-commands | Plugin + Skills + UserPromptSubmit Hook | commit にモデルと effort を記録し、GitHub.com/GitHub Enterprise PR body の `Generated with [Codex](https://chatgpt.com/codex)` を検証し、force cleanup を維持します。 | [プラグイン docs](docs/commit-commands/README.md) |
 
 ## 🚀 クイックスタート
 

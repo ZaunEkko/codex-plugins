@@ -21,7 +21,7 @@
 | 插件 | 類型 | 說明 | 文件 |
 |------|------|------|------|
 | explanatory-output-style | Plugin + SessionStart Hook | 將 Claude Code 官方 explanatory-output-style 體驗適配到 Codex。 | [插件文件](docs/explanatory-output-style/README.md) |
-| commit-commands | Plugin + Skills | 依 Anthropic 原版提供 commit、commit-push-pr 與 gone 分支 force 清理流程。 | [插件文件](docs/commit-commands/README.md) |
+| commit-commands | Plugin + Skills + UserPromptSubmit Hook | 為提交標註模型與思考強度、驗證 GitHub.com/GitHub Enterprise PR 正文的 `Generated with [Codex](https://chatgpt.com/codex)`，並保留 gone 分支 force 清理。 | [插件文件](docs/commit-commands/README.md) |
 
 ## 🚀 快速開始
 
