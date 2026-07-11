@@ -39,15 +39,21 @@ Model: <active-model-slug> <active-reasoning-effort>
 Co-authored-by: Codex <noreply@openai.com>
 ```
 
-Codex supplies the active model slug directly, but the current hook schema does not expose reasoning effort. The plugin exactly matches the current `turn_id` and model against a `turn_context` near the end of `transcript_path`; if that fails, it uses `model_reasoning_effort` only when user config targets the same model. It extracts only attribution fields and never copies or stores prompt content. Because transcript format is not stable, failure omits the effort suffix; an untrusted hook or missing model context still stops the skill before staging or committing.
+Codex supplies the active model slug directly, but the current hook schema does not expose reasoning effort. The plugin accepts only a future direct effort field or an exact current `turn_id` and model match against a `turn_context` near the end of `transcript_path`. It does not infer the current effort from user config because CLI, project, profile, and runtime overrides can make that file stale. It extracts only attribution fields, never copies or stores prompt content, and does not depend on Python 3.11's `tomllib`. Because transcript format is not stable, failure omits the effort suffix; an untrusted hook or missing model context still stops the skill before staging or committing.
 
 It does not push or open a PR, and it does not create an empty commit when there are no changes.
 
 ## `$commit-push-pr`
 
-Inspects the current status, diff, and branch. It creates a new branch only when the current branch is exactly `main`, then creates one commit, pushes to `origin`, and opens a PR with `gh pr create`.
+Inspects the current status, diff, branch, and commits relative to the intended base. With worktree changes, it creates a new branch only when the current branch is exactly `main`, then creates one model-attributed commit. With a clean worktree and existing commits outside the intended base, it publishes those commits directly. Both paths push to `origin`.
 
-The skill requires explicit PR intent. Like the original, it has no publish-without-a-new-commit path and does not create policy-driven replacement branches for names other than `main`.
+The skill never calls `gh pr create` directly. It passes the complete PR body to the bundled `scripts/create_pr_with_attribution.py` wrapper, which appends the footer, creates the PR through `--body-file`, reads the body back, repairs it once if needed, and returns the URL only after the final non-empty line is exactly:
+
+```text
+Generated with [Codex](https://chatgpt.com/codex)
+```
+
+The skill requires explicit PR intent. If neither worktree changes nor commits outside the intended base exist, it creates neither an empty commit nor an empty PR. It does not create policy-driven replacement branches for names other than `main`. Invoke `$commit-push-pr` explicitly when this exact workflow must be used.
 
 GitHub CLI must be installed and authenticated, and the repository must have an `origin` remote.
 

@@ -1,3 +1,4 @@
+import importlib.util
 import json
 import os
 import subprocess
@@ -5,6 +6,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -17,6 +19,7 @@ SKILLS = {
     "commit-push-pr": PLUGIN_ROOT / "skills" / "commit-push-pr",
     "clean-gone": PLUGIN_ROOT / "skills" / "clean-gone",
 }
+PR_WRAPPER = SKILLS["commit-push-pr"] / "scripts" / "create_pr_with_attribution.py"
 DOCUMENTATION = {
     "简体中文": ROOT / "docs" / "commit-commands" / "README.md",
     "English": ROOT / "i18n" / "en" / "docs" / "commit-commands" / "README.md",
@@ -125,7 +128,7 @@ class CommitCommandsPluginTests(unittest.TestCase):
         self.assertIn("`Model: gpt-5.6-sol xhigh`", context)
         self.assertNotIn("`Model: gpt-5.6-sol low`", context)
 
-    def test_user_prompt_hook_falls_back_to_matching_user_config(self):
+    def test_user_prompt_hook_ignores_unproven_user_config_effort(self):
         with tempfile.TemporaryDirectory() as directory:
             codex_home = Path(directory)
             (codex_home / "config.toml").write_text(
@@ -138,8 +141,36 @@ class CommitCommandsPluginTests(unittest.TestCase):
             )
 
         context = payload["hookSpecificOutput"]["additionalContext"]
-        self.assertIn("Active Codex reasoning effort: `medium`", context)
-        self.assertIn("`Model: gpt-5.6-sol medium`", context)
+        self.assertIn("reasoning effort is unavailable", context)
+        self.assertIn("`Model: gpt-5.6-sol`", context)
+        self.assertNotIn("`Model: gpt-5.6-sol medium`", context)
+
+    def test_user_prompt_hook_runs_when_tomllib_is_unavailable(self):
+        with tempfile.TemporaryDirectory() as directory:
+            sitecustomize = Path(directory) / "sitecustomize.py"
+            sitecustomize.write_text(
+                "import builtins\n"
+                "original_import = builtins.__import__\n"
+                "def blocked_import(name, *args, **kwargs):\n"
+                "    if name == 'tomllib':\n"
+                "        raise ModuleNotFoundError(\"No module named 'tomllib'\")\n"
+                "    return original_import(name, *args, **kwargs)\n"
+                "builtins.__import__ = blocked_import\n",
+                encoding="utf-8",
+            )
+            environment = os.environ.copy()
+            existing_pythonpath = environment.get("PYTHONPATH")
+            environment["PYTHONPATH"] = (
+                str(sitecustomize.parent)
+                if not existing_pythonpath
+                else os.pathsep.join((str(sitecustomize.parent), existing_pythonpath))
+            )
+            payload = self.run_model_hook("gpt-5.6-sol", environment=environment)
+
+        context = payload["hookSpecificOutput"]["additionalContext"]
+        self.assertIn("Active Codex model slug: `gpt-5.6-sol`", context)
+        self.assertIn("reasoning effort is unavailable", context)
+        self.assertIn("`Model: gpt-5.6-sol`", context)
 
     def test_user_prompt_hook_rejects_unsafe_model_values(self):
         with tempfile.TemporaryDirectory() as directory:
@@ -227,20 +258,75 @@ class CommitCommandsPluginTests(unittest.TestCase):
         self.assertIn("noreply@openai.com", text)
         self.assertIn("Do not push", text)
 
-    def test_commit_push_pr_matches_upstream_workflow(self):
+    def test_commit_push_pr_publishes_new_or_existing_work_with_verified_footer(self):
         text = (SKILLS["commit-push-pr"] / "SKILL.md").read_text(encoding="utf-8")
         self.assertIn("current branch is exactly `main`", text)
         self.assertIn("git checkout -b <branch>", text)
         self.assertIn("create exactly one commit", text)
+        self.assertIn("publishes already committed work", text)
+        self.assertIn("If the worktree is clean", text)
         self.assertIn("Push the current branch to `origin`", text)
-        self.assertIn("gh pr create", text)
-        self.assertIn("Generated with [Codex](https://chatgpt.com/codex)", text)
+        self.assertIn("scripts/create_pr_with_attribution.py", text)
+        self.assertIn("Never call `gh pr create` directly", text)
+        self.assertIn("gh pr create --body-file", text)
+        self.assertIn("gh pr view", text)
+        self.assertIn("gh pr edit", text)
+        self.assertGreaterEqual(text.count("Generated with [Codex](https://chatgpt.com/codex)"), 2)
         self.assertIn("Model: <active-model-slug> <active-reasoning-effort>", text)
         self.assertIn("commit-commands runtime metadata for this turn", text)
         self.assertIn("commit-and-push-only", text)
         self.assertIn("branch-publishing requests without explicit PR intent", text)
         self.assertNotIn("`dev`", text)
         self.assertNotIn("repository-required integration branch", text)
+
+    def load_pr_wrapper(self):
+        specification = importlib.util.spec_from_file_location(
+            "commit_commands_pr_wrapper",
+            PR_WRAPPER,
+        )
+        module = importlib.util.module_from_spec(specification)
+        specification.loader.exec_module(module)
+        return module
+
+    def test_pr_wrapper_replaces_legacy_footer_with_linked_codex_footer(self):
+        wrapper = self.load_pr_wrapper()
+        rendered = wrapper.render_body(
+            "## Summary\n\nGenerated with Codex assistance.\n"
+        )
+
+        self.assertEqual(wrapper.final_nonempty_line(rendered), wrapper.FOOTER)
+        self.assertEqual(rendered.count(wrapper.FOOTER), 1)
+        self.assertNotIn("Generated with Codex assistance.", rendered)
+
+    def test_pr_wrapper_repairs_and_verifies_created_pr_body(self):
+        wrapper = self.load_pr_wrapper()
+        url = "https://github.com/ZaunEkko/codex-plugins/pull/99"
+        completed = subprocess.CompletedProcess
+        responses = [
+            completed([], 0, stdout=f"{url}\n", stderr=""),
+            completed([], 0, stdout=json.dumps({"url": url, "body": "## Summary\n"}), stderr=""),
+            completed([], 0, stdout="", stderr=""),
+            completed(
+                [],
+                0,
+                stdout=json.dumps({"url": url, "body": f"## Summary\n\n{wrapper.FOOTER}\n"}),
+                stderr="",
+            ),
+        ]
+
+        with mock.patch.object(wrapper.subprocess, "run", side_effect=responses) as run:
+            created_url = wrapper.create_pull_request(
+                "## Summary\n",
+                ["--title", "Test PR", "--base", "dev"],
+            )
+
+        self.assertEqual(created_url, url)
+        commands = [call.args[0] for call in run.call_args_list]
+        self.assertEqual(commands[0][:3], ["gh", "pr", "create"])
+        self.assertIn("--body-file", commands[0])
+        self.assertEqual(commands[1][:3], ["gh", "pr", "view"])
+        self.assertEqual(commands[2][:3], ["gh", "pr", "edit"])
+        self.assertEqual(commands[3][:3], ["gh", "pr", "view"])
 
     def test_clean_gone_matches_upstream_force_cleanup(self):
         text = (SKILLS["clean-gone"] / "SKILL.md").read_text(encoding="utf-8")
@@ -267,7 +353,8 @@ class CommitCommandsPluginTests(unittest.TestCase):
                 text = path.read_text(encoding="utf-8")
                 self.assertIn("$commit-push-pr", text)
                 self.assertIn("$clean-gone", text)
-                self.assertIn("Generated with [Codex](https://chatgpt.com/codex)", text)
+                self.assertGreaterEqual(text.count("Generated with [Codex](https://chatgpt.com/codex)"), 2)
+                self.assertIn("create_pr_with_attribution.py", text)
                 self.assertIn("Model: <active-model-slug> <active-reasoning-effort>", text)
                 self.assertIn("/hooks", text)
                 self.assertIn("git branch -D", text)
@@ -280,6 +367,7 @@ class CommitCommandsPluginTests(unittest.TestCase):
                 self.assertIn("commit-commands@zaunekko", text)
                 self.assertIn("docs/commit-commands/README.md", text)
                 self.assertIn("Plugin + Skills", text)
+                self.assertIn("Generated with [Codex](https://chatgpt.com/codex)", text)
                 self.assertIn("force", text.lower())
 
 

@@ -1,6 +1,6 @@
 interface:
   display_name: "Commit, Push, and Open PR"
-  short_description: "Commit with model and effort attribution, push, and open a PR"
+  short_description: "Publish commits with verified Codex PR attribution"
   default_prompt: "Use $commit-push-pr to commit my changes, push the branch, and open a pull request."
 
 policy:
