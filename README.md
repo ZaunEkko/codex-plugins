@@ -38,7 +38,7 @@
 | 插件 | 类型 | 说明 | 文档 |
 |------|------|------|------|
 | explanatory-output-style | Plugin + SessionStart Hook | 把 Claude Code 官方 explanatory-output-style 插件的解释型协作体验适配到 Codex。 | [插件文档](docs/explanatory-output-style/README.md) |
-| commit-commands | Plugin + Skills + UserPromptSubmit Hook | 为提交加入模型与思考强度，并为 PR 正文加入可验证的 Codex attribution；同时 force 清理 gone 分支。 | [插件文档](docs/commit-commands/README.md) |
+| commit-commands | Plugin + Skills + UserPromptSubmit Hook | 为提交加入模型与思考强度，为 GitHub.com/GitHub Enterprise PR 正文加入可验证的 Codex attribution，并 force 清理 gone 分支。 | [插件文档](docs/commit-commands/README.md) |
 
 ## 🚀 快速开始
 

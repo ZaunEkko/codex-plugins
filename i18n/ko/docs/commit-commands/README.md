@@ -47,7 +47,7 @@ push 또는 PR 생성을 하지 않으며 변경이 없으면 빈 commit 도 만
 
 현재 status, diff, branch 와 대상 base 대비 commit 을 확인합니다. worktree 에 변경이 있으면 현재 브랜치가 정확히 `main` 일 때만 새 브랜치를 만들고 모델 attribution 이 포함된 commit 하나를 생성합니다. worktree 가 clean 이더라도 대상 base 에 없는 기존 commit 이 있으면 해당 commit 을 그대로 게시합니다. 두 경로 모두 `origin` 에 push 합니다.
 
-skill 은 `gh pr create` 를 직접 호출하지 않습니다. 전체 PR body 를 번들 `scripts/create_pr_with_attribution.py` wrapper 에 전달합니다. wrapper 는 footer 를 추가하고 `--body-file` 로 PR 을 만든 뒤 body 를 다시 읽으며, 필요하면 한 번 수정합니다. 마지막 비어 있지 않은 줄이 정확히 다음과 같을 때만 URL 을 반환합니다.
+skill 은 `gh pr create` 를 직접 호출하지 않습니다. 전체 PR body 를 번들 `scripts/create_pr_with_attribution.py` wrapper 에 전달합니다. wrapper 는 GitHub.com 및 GitHub Enterprise PR URL 을 지원하고 footer 를 추가하며, `--body-file` 로 PR 을 만든 뒤 body 를 다시 읽고 필요하면 한 번 수정합니다. 마지막 비어 있지 않은 줄이 정확히 다음과 같을 때만 URL 을 반환합니다.
 
 ```text
 Generated with [Codex](https://chatgpt.com/codex)

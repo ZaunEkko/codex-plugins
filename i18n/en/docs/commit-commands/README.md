@@ -47,7 +47,7 @@ It does not push or open a PR, and it does not create an empty commit when there
 
 Inspects the current status, diff, branch, and commits relative to the intended base. With worktree changes, it creates a new branch only when the current branch is exactly `main`, then creates one model-attributed commit. With a clean worktree and existing commits outside the intended base, it publishes those commits directly. Both paths push to `origin`.
 
-The skill never calls `gh pr create` directly. It passes the complete PR body to the bundled `scripts/create_pr_with_attribution.py` wrapper, which appends the footer, creates the PR through `--body-file`, reads the body back, repairs it once if needed, and returns the URL only after the final non-empty line is exactly:
+The skill never calls `gh pr create` directly. It passes the complete PR body to the bundled `scripts/create_pr_with_attribution.py` wrapper, which accepts GitHub.com and GitHub Enterprise PR URLs, appends the footer, creates the PR through `--body-file`, reads the body back, repairs it once if needed, and returns the URL only after the final non-empty line is exactly:
 
 ```text
 Generated with [Codex](https://chatgpt.com/codex)

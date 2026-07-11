@@ -298,6 +298,17 @@ class CommitCommandsPluginTests(unittest.TestCase):
         self.assertEqual(rendered.count(wrapper.FOOTER), 1)
         self.assertNotIn("Generated with Codex assistance.", rendered)
 
+    def test_pr_wrapper_accepts_github_enterprise_urls(self):
+        wrapper = self.load_pr_wrapper()
+        urls = (
+            "https://github.example.com/acme/widgets/pull/42",
+            "http://github.internal:8080/acme/widgets/pull/43",
+        )
+
+        for url in urls:
+            with self.subTest(url=url):
+                self.assertEqual(wrapper.pull_request_url(f"Created pull request: {url}\n"), url)
+
     def test_pr_wrapper_repairs_and_verifies_created_pr_body(self):
         wrapper = self.load_pr_wrapper()
         url = "https://github.com/ZaunEkko/codex-plugins/pull/99"
@@ -355,6 +366,7 @@ class CommitCommandsPluginTests(unittest.TestCase):
                 self.assertIn("$clean-gone", text)
                 self.assertGreaterEqual(text.count("Generated with [Codex](https://chatgpt.com/codex)"), 2)
                 self.assertIn("create_pr_with_attribution.py", text)
+                self.assertIn("GitHub Enterprise", text)
                 self.assertIn("Model: <active-model-slug> <active-reasoning-effort>", text)
                 self.assertIn("/hooks", text)
                 self.assertIn("git branch -D", text)
@@ -368,6 +380,7 @@ class CommitCommandsPluginTests(unittest.TestCase):
                 self.assertIn("docs/commit-commands/README.md", text)
                 self.assertIn("Plugin + Skills", text)
                 self.assertIn("Generated with [Codex](https://chatgpt.com/codex)", text)
+                self.assertIn("GitHub Enterprise", text)
                 self.assertIn("force", text.lower())
 
 

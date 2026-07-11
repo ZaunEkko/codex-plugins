@@ -12,7 +12,7 @@ LEGACY_FOOTERS = {
     "Generated with Codex assistance.",
     "Generated with Codex",
 }
-PR_URL_PATTERN = re.compile(r"https://github\.com/[^/\s]+/[^/\s]+/pull/\d+")
+PR_URL_PATTERN = re.compile(r"https?://[^/\s]+/[^/\s]+/[^/\s]+/pull/\d+")
 
 
 def final_nonempty_line(body):
