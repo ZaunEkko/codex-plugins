@@ -1,6 +1,6 @@
 ---
 name: commit-push-pr
-description: "Publish work as a GitHub pull request: create a branch when currently on main, create one current-model-and-reasoning-effort-attributed commit when the worktree has changes or reuse existing branch commits when it is clean, push to origin, and open a PR through the bundled wrapper that guarantees linked Codex attribution in the body. Use only when the user explicitly asks to create or open a pull request, including push-and-PR requests for already committed work. Do not use for commit-only, commit-and-push-only, or branch-publishing requests without explicit PR intent."
+description: "Publish work as a GitHub.com or GitHub Enterprise pull request: create a branch when currently on main, create one current-model-and-reasoning-effort-attributed commit when the worktree has changes or reuse existing branch commits when it is clean, push to origin, and open a PR through the bundled wrapper that guarantees linked Codex attribution in the body. Use only when the user explicitly asks to create or open a pull request, including push-and-PR requests for already committed work. Do not use for commit-only, commit-and-push-only, or branch-publishing requests without explicit PR intent."
 ---
 
 # Commit, Push, and Open PR
@@ -34,7 +34,7 @@ Co-authored-by: Codex <noreply@openai.com>
 python3 <skill-directory>/scripts/create_pr_with_attribution.py -- --title "<title>" --base "<base>" --head "<head>"
 ```
 
-   On Windows, use `python` when `python3` is unavailable. The wrapper appends `Generated with [Codex](https://chatgpt.com/codex)`, creates the PR with `gh pr create --body-file`, reads it back with `gh pr view`, repairs it once with `gh pr edit` if needed, and fails unless the footer is the final non-empty line.
+   On Windows, use `python` when `python3` is unavailable. The wrapper accepts PR URLs from GitHub.com and GitHub Enterprise hosts, appends `Generated with [Codex](https://chatgpt.com/codex)`, creates the PR with `gh pr create --body-file`, reads it back with `gh pr view`, repairs it once with `gh pr edit` if needed, and fails unless the footer is the final non-empty line.
 8. Return the pull request URL printed by the wrapper.
 
 ## Boundaries
