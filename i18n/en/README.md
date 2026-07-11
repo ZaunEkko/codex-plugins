@@ -23,7 +23,7 @@ The goal is to package useful Codex configurations so other people can install, 
 | Plugin | Type | Description | Docs |
 |--------|------|-------------|------|
 | explanatory-output-style | Plugin + SessionStart Hook | Ports the official Claude Code explanatory-output-style experience to Codex. | [Plugin docs](docs/explanatory-output-style/README.md) |
-| commit-commands | Plugin + Skills | Matches Anthropic's commit, commit-push-pr, and force cleanup workflows for gone branches. | [Plugin docs](docs/commit-commands/README.md) |
+| commit-commands | Plugin + Skills + UserPromptSubmit Hook | Attributes commits, verifies `Generated with [Codex](https://chatgpt.com/codex)` in GitHub.com/GitHub Enterprise PR bodies, and preserves force cleanup. | [Plugin docs](docs/commit-commands/README.md) |
 
 ## 🚀 Quick start
 

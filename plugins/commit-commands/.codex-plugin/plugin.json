@@ -1,19 +1,20 @@
 {
   "name": "commit-commands",
-  "version": "1.0.0+codex.20260630020103",
-  "description": "Codex-native skills matching Anthropic's commit, commit-push-pr, and clean_gone workflows.",
+  "version": "1.0.0+codex.20260711125215",
+  "description": "Codex-native commit and PR workflows with verified attribution.",
   "author": {
     "name": "ZaunEkko"
   },
   "skills": "./skills/",
   "interface": {
     "displayName": "Commit Commands",
-    "shortDescription": "Anthropic commit commands adapted as Codex skills.",
-    "longDescription": "A native Codex skill adaptation of Anthropic's commit-commands plugin. It preserves the original commit, commit-push-pr, and forceful clean_gone workflows while adding Codex-native invocation and Codex attribution.",
+    "shortDescription": "Commit and PR workflows with verified Codex attribution.",
+    "longDescription": "A native Codex adaptation of Anthropic's commit-commands plugin. It adds current-model and reasoning-effort attribution to new commits, can publish already committed branch work, uses a bundled wrapper to guarantee linked Codex attribution in GitHub.com and GitHub Enterprise PR bodies, and preserves forceful clean_gone cleanup.",
     "developerName": "ZaunEkko",
     "category": "Productivity",
     "capabilities": [
       "Skills",
+      "Hooks",
       "Git Workflows"
     ],
     "defaultPrompt": [

@@ -10,7 +10,7 @@ $commit-push-pr
 $clean-gone
 ```
 
-工作流程步驟以原版為準。Codex 差異只限於原生 skill 結構、明確意圖的自動選擇、`$skill-name` 入口與 Codex attribution。
+工作流程步驟以原版為準。Codex 差異包括原生 skill 結構、明確意圖的自動選擇、`$skill-name` 入口，以及透過 `UserPromptSubmit` hook 動態提供目前 Codex 模型與思考強度。
 
 ## 安裝
 
@@ -19,7 +19,7 @@ codex plugin marketplace add ZaunEkko/codex-plugins
 codex plugin add commit-commands@zaunekko
 ```
 
-安裝或更新後請開啟新的 Codex thread。
+安裝或更新後，請先在 `/hooks` 中審查並信任 `commit-commands` hook，再開啟新的 Codex thread。
 
 ## 自動選擇範例
 
@@ -33,16 +33,27 @@ codex plugin add commit-commands@zaunekko
 檢查 `git status`、`git diff HEAD`、目前分支與最近十筆提交，暫存目前改動並建立一個 commit，加入：
 
 ```text
+Generated with [Codex](https://chatgpt.com/codex)
+Model: <active-model-slug> <active-reasoning-effort>
+
 Co-authored-by: Codex <noreply@openai.com>
 ```
+
+Codex 會直接提供目前模型 slug，但現行 hook schema 不提供思考強度。插件只接受 hook 未來可能直接提供的 effort，或以目前 `turn_id` 與模型精確比對 `transcript_path` 尾端的 `turn_context`；它不會從使用者設定推測目前 effort，因為 CLI、專案、profile 與 runtime override 可能讓檔案值過期。解析器只提取 attribution 欄位，不複製或保存 prompt，也不依賴 Python 3.11 才提供的 `tomllib`。因 transcript 格式並不穩定，失敗時只省略強度後綴；hook 未受信任或模型 context 缺失時，skill 才會在 stage 或 commit 前停止。
 
 不會推送、建立 PR 或在沒有改動時建立空 commit。
 
 ## `$commit-push-pr`
 
-檢查目前狀態、diff 與分支。只有目前分支恰好是 `main` 時才建立新分支，接著建立一個 commit、推送到 `origin`，並以 `gh pr create` 建立 PR。
+檢查目前狀態、diff、分支，以及相對目標 base 的提交。worktree 有改動時，只有目前分支恰好是 `main` 才建立新分支，接著建立一個含模型 attribution 的 commit；worktree 乾淨但目前分支已有目標 base 之外的提交時，會直接發布這些既有提交。兩條路徑都會推送到 `origin`。
 
-此 skill 需要明確的 PR 意圖。與原版一樣，它不支援沒有新 commit 也發布 PR，也不會為 `main` 以外的不合規分支自動建立替代分支。
+skill 不會直接呼叫 `gh pr create`，而是將完整 PR 正文交給內建 `scripts/create_pr_with_attribution.py` wrapper。wrapper 支援 GitHub.com 與 GitHub Enterprise PR URL，會追加尾註、透過 `--body-file` 建立 PR、反讀正文，必要時修復一次，且只有最後一個非空白行確認為下列內容時才回傳 URL：
+
+```text
+Generated with [Codex](https://chatgpt.com/codex)
+```
+
+此 skill 需要明確的 PR 意圖。若既無 worktree 改動，也沒有目標 base 之外的提交，就不會建立空 commit 或空 PR；也不會為 `main` 以外的不合規分支自動建立替代分支。需要確保使用此流程時，請明確呼叫 `$commit-push-pr`。
 
 需要已安裝並登入 GitHub CLI，倉庫也必須有 `origin` remote。
 
@@ -55,6 +66,8 @@ Co-authored-by: Codex <noreply@openai.com>
 ## 本機驗證
 
 ```bash
+python -m py_compile plugins/commit-commands/hooks/model_context.py
+'{"hook_event_name":"UserPromptSubmit","model":"gpt-5.6-sol","effort":"xhigh"}' | python plugins/commit-commands/hooks/model_context.py
 python -m unittest discover -s tests
 codex plugin list
 ```
