@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${PLUGIN_ROOT}/hooks/model_context.py\"",
+            "commandWindows": "python -c \"import os, runpy; runpy.run_path(os.path.join(os.environ['PLUGIN_ROOT'], 'hooks', 'model_context.py'), run_name='__main__')\""
+          }
+        ]
+      }
+    ]
+  }
+}
