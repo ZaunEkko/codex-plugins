@@ -23,7 +23,7 @@ The goal is to package useful Codex configurations so other people can install, 
 | Plugin | Type | Description | Docs |
 |--------|------|-------------|------|
 | explanatory-output-style | Plugin + SessionStart Hook | Ports the official Claude Code explanatory-output-style experience to Codex. | [Plugin docs](docs/explanatory-output-style/README.md) |
-| commit-commands | Plugin + Skills + UserPromptSubmit Hook | Attributes commits to the active Codex model and reasoning effort while preserving force cleanup. | [Plugin docs](docs/commit-commands/README.md) |
+| commit-commands | Plugin + Skills + UserPromptSubmit Hook | Attributes commits to the active model and effort, verifies `Generated with [Codex](https://chatgpt.com/codex)` in PR bodies, and preserves force cleanup. | [Plugin docs](docs/commit-commands/README.md) |
 
 ## 🚀 Quick start
 

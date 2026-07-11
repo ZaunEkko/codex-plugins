@@ -1,10 +1,7 @@
 import json
-import os
 import re
 import sys
 from pathlib import Path
-
-import tomllib
 
 
 MODEL_PATTERN = re.compile(r"[A-Za-z0-9][A-Za-z0-9._:/+@-]{0,199}\Z")
@@ -64,24 +61,7 @@ def read_current_turn_effort(transcript_path, turn_id, model):
     return None
 
 
-def read_config_effort(model, environment=None):
-    environment = os.environ if environment is None else environment
-    codex_home = environment.get("CODEX_HOME")
-    config_path = Path(codex_home) / "config.toml" if codex_home else Path.home() / ".codex" / "config.toml"
-
-    try:
-        with config_path.open("rb") as stream:
-            config = tomllib.load(stream)
-    except (OSError, tomllib.TOMLDecodeError):
-        return None
-
-    configured_model = validate_model(config.get("model"))
-    if configured_model is not None and configured_model != model:
-        return None
-    return validate_effort(config.get("model_reasoning_effort"))
-
-
-def resolve_effort(hook_input, environment=None):
+def resolve_effort(hook_input):
     for key in ("effort", "model_reasoning_effort"):
         direct_effort = validate_effort(hook_input.get(key))
         if direct_effort is not None:
@@ -99,7 +79,7 @@ def resolve_effort(hook_input, environment=None):
     if transcript_effort is not None:
         return transcript_effort
 
-    return read_config_effort(model, environment)
+    return None
 
 
 def build_context(model, effort=None):

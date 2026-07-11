@@ -39,15 +39,21 @@ Model: <active-model-slug> <active-reasoning-effort>
 Co-authored-by: Codex <noreply@openai.com>
 ```
 
-Codex 는 현재 모델 slug 를 직접 전달하지만 현행 hook schema 는 reasoning effort 를 제공하지 않습니다. 플러그인은 현재 `turn_id` 와 모델을 `transcript_path` 끝의 `turn_context` 와 정확히 맞추고, 실패하면 사용자 설정이 같은 모델을 가리킬 때만 `model_reasoning_effort` 로 fallback 합니다. attribution 필드만 추출하며 prompt 를 복사하거나 저장하지 않습니다. transcript 형식이 안정적이지 않으므로 실패하면 effort suffix 만 생략합니다. hook 이 trust 되지 않았거나 모델 context 가 없으면 stage 또는 commit 전에 중지합니다.
+Codex 는 현재 모델 slug 를 직접 전달하지만 현행 hook schema 는 reasoning effort 를 제공하지 않습니다. 플러그인은 hook 이 향후 직접 제공하는 effort 또는 현재 `turn_id` 와 모델이 정확히 일치하는 `transcript_path` 끝의 `turn_context` 만 사용합니다. CLI, project, profile, runtime override 로 파일 값이 오래될 수 있으므로 사용자 설정에서 현재 effort 를 추정하지 않습니다. attribution 필드만 추출하며 prompt 를 복사하거나 저장하지 않고 Python 3.11 의 `tomllib` 에 의존하지 않습니다. transcript 형식이 안정적이지 않으므로 실패하면 effort suffix 만 생략합니다. hook 이 trust 되지 않았거나 모델 context 가 없으면 stage 또는 commit 전에 중지합니다.
 
 push 또는 PR 생성을 하지 않으며 변경이 없으면 빈 commit 도 만들지 않습니다.
 
 ## `$commit-push-pr`
 
-현재 status, diff, branch 를 확인합니다. 현재 브랜치가 정확히 `main` 일 때만 새 브랜치를 만든 뒤 하나의 commit 을 만들고 `origin` 에 push 하며 `gh pr create` 로 PR 을 엽니다.
+현재 status, diff, branch 와 대상 base 대비 commit 을 확인합니다. worktree 에 변경이 있으면 현재 브랜치가 정확히 `main` 일 때만 새 브랜치를 만들고 모델 attribution 이 포함된 commit 하나를 생성합니다. worktree 가 clean 이더라도 대상 base 에 없는 기존 commit 이 있으면 해당 commit 을 그대로 게시합니다. 두 경로 모두 `origin` 에 push 합니다.
 
-명시적인 PR 의도가 필요합니다. 원본과 마찬가지로 새 commit 없이 게시하는 경로나 `main` 이외의 브랜치 이름을 정책에 맞춰 자동 전환하는 동작은 없습니다.
+skill 은 `gh pr create` 를 직접 호출하지 않습니다. 전체 PR body 를 번들 `scripts/create_pr_with_attribution.py` wrapper 에 전달합니다. wrapper 는 footer 를 추가하고 `--body-file` 로 PR 을 만든 뒤 body 를 다시 읽으며, 필요하면 한 번 수정합니다. 마지막 비어 있지 않은 줄이 정확히 다음과 같을 때만 URL 을 반환합니다.
+
+```text
+Generated with [Codex](https://chatgpt.com/codex)
+```
+
+명시적인 PR 의도가 필요합니다. worktree 변경도 대상 base 에 없는 commit 도 없으면 빈 commit 이나 빈 PR 을 만들지 않습니다. `main` 이외의 브랜치를 정책에 맞춰 자동 전환하지도 않습니다. 이 흐름을 확실히 사용하려면 `$commit-push-pr` 를 명시적으로 호출하세요.
 
 GitHub CLI 설치와 로그인, 그리고 `origin` remote 가 필요합니다.
 

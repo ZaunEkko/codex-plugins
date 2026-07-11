@@ -39,15 +39,21 @@ Model: <active-model-slug> <active-reasoning-effort>
 Co-authored-by: Codex <noreply@openai.com>
 ```
 
-Codex は現在のモデル slug を直接渡しますが、現行 hook schema は reasoning effort を公開しません。プラグインは現在の `turn_id` とモデルを `transcript_path` 末尾の `turn_context` に厳密に照合し、失敗時はユーザー設定が同じモデルを対象にする場合だけ `model_reasoning_effort` へ fallback します。attribution フィールドだけを抽出し、prompt はコピーも保存もしません。transcript 形式は不安定なため、失敗時は effort suffix のみ省略します。hook が trust されていない、またはモデル context がない場合は stage や commit の前に停止します。
+Codex は現在のモデル slug を直接渡しますが、現行 hook schema は reasoning effort を公開しません。プラグインは hook が将来直接提供する effort、または現在の `turn_id` とモデルに一致する `transcript_path` 末尾の `turn_context` だけを使用します。CLI、project、profile、runtime override によりファイル値が古くなる可能性があるため、ユーザー設定から現在の effort を推測しません。attribution フィールドだけを抽出し、prompt はコピーも保存もせず、Python 3.11 の `tomllib` に依存しません。transcript 形式は不安定なため、失敗時は effort suffix のみ省略します。hook が trust されていない、またはモデル context がない場合は stage や commit の前に停止します。
 
 push や PR 作成は行わず、変更がない場合は空 commit も作成しません。
 
 ## `$commit-push-pr`
 
-現在の status、diff、branch を確認します。現在のブランチが正確に `main` の場合だけ新しいブランチを作り、1 つの commit を作成して `origin` へ push し、`gh pr create` で PR を開きます。
+現在の status、diff、branch、および対象 base との差分 commit を確認します。worktree に変更がある場合は、現在のブランチが正確に `main` のときだけ新しいブランチを作り、モデル attribution 付きの commit を 1 つ作成します。worktree が clean でも対象 base にない既存 commit がある場合は、その commit をそのまま公開します。どちらも `origin` へ push します。
 
-明示的な PR 意図が必要です。原版と同様に、新しい commit なしで公開する経路や、`main` 以外のブランチ名をポリシーに合わせて自動移行する処理はありません。
+skill は `gh pr create` を直接呼び出しません。完全な PR body を同梱の `scripts/create_pr_with_attribution.py` wrapper に渡します。wrapper が footer を追加し、`--body-file` で PR を作成して body を再取得し、必要なら一度修復します。最後の空でない行が次の文字列だと確認できた場合だけ URL を返します。
+
+```text
+Generated with [Codex](https://chatgpt.com/codex)
+```
+
+明示的な PR 意図が必要です。worktree の変更も対象 base にない commit もない場合、空 commit や空 PR は作成しません。`main` 以外のブランチをポリシーに合わせて自動移行する処理もありません。このフローを確実に使うには `$commit-push-pr` を明示的に呼び出してください。
 
 GitHub CLI のインストールとログイン、および `origin` remote が必要です。
 
