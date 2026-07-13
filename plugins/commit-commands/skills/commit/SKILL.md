@@ -20,6 +20,7 @@ Adapt Anthropic's `/commit` workflow as a native Codex skill.
 
 ```text
 Generated with [Codex](https://chatgpt.com/codex)
+
 Model: <active-model-slug> <active-reasoning-effort>
 
 Co-authored-by: Codex <noreply@openai.com>
