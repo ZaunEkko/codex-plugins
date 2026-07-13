@@ -34,6 +34,7 @@ Inspects `git status`, `git diff HEAD`, the current branch, and the latest ten c
 
 ```text
 Generated with [Codex](https://chatgpt.com/codex)
+
 Model: <active-model-slug> <active-reasoning-effort>
 
 Co-authored-by: Codex <noreply@openai.com>
@@ -47,7 +48,7 @@ It does not push or open a PR, and it does not create an empty commit when there
 
 Inspects the current status, diff, branch, and commits relative to the intended base. With worktree changes, it creates a new branch only when the current branch is exactly `main`, then creates one model-attributed commit. With a clean worktree and existing commits outside the intended base, it publishes those commits directly. Both paths push to `origin`.
 
-The skill never calls `gh pr create` directly. It passes the complete PR body to the bundled `scripts/create_pr_with_attribution.py` wrapper, which accepts GitHub.com and GitHub Enterprise PR URLs, appends the footer, creates the PR through `--body-file`, reads the body back, repairs it once if needed, and returns the URL only after the final non-empty line is exactly:
+The skill never calls `gh pr create` directly. It saves the complete PR body as a temporary UTF-8 Markdown file and passes that file through the bundled `scripts/create_pr_with_attribution.py` wrapper's own `--body-file` option, avoiding Windows PowerShell 5.1's ASCII external-pipeline conversion. The wrapper accepts GitHub.com and GitHub Enterprise PR URLs, appends the footer, creates the PR through `gh pr create --body-file`, reads the complete body back, repairs it once if needed, and returns the URL only after the complete body matches:
 
 ```text
 Generated with [Codex](https://chatgpt.com/codex)

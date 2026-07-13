@@ -19,6 +19,7 @@ Adapt Anthropic's `/commit-push-pr` workflow as a native Codex skill.
 
 ```text
 Generated with [Codex](https://chatgpt.com/codex)
+
 Model: <active-model-slug> <active-reasoning-effort>
 
 Co-authored-by: Codex <noreply@openai.com>
@@ -27,14 +28,14 @@ Co-authored-by: Codex <noreply@openai.com>
    If the runtime metadata says reasoning effort is unavailable, omit only the effort suffix and keep `Model: <active-model-slug>`.
 4. If the worktree is clean, do not create an empty commit. Continue only when `HEAD` contains at least one commit that is not in the intended PR base; this path publishes already committed work and does not require runtime model metadata. If the current branch is exactly `main`, first create a new work branch at the current `HEAD` with `git checkout -b <branch>` so `main` is never pushed as the PR head.
 5. Push the current branch to `origin`.
-6. Draft the complete PR body with a 1–3 bullet summary and a test-plan checklist. Do not add product attribution yourself; the bundled wrapper owns it.
-7. Resolve `scripts/create_pr_with_attribution.py` relative to this `SKILL.md`. Pass the complete PR body on stdin and pass the intended `gh pr create` arguments after `--`, for example:
+6. Draft the complete PR body with a 1–3 bullet summary and a test-plan checklist. Do not add product attribution yourself; the bundled wrapper owns it. Save the body as a temporary UTF-8 Markdown file and remove that file after the wrapper finishes.
+7. Resolve `scripts/create_pr_with_attribution.py` relative to this `SKILL.md`. Pass the temporary file through the wrapper's `--body-file` option, then pass the intended `gh pr create` arguments after `--`, for example:
 
 ```bash
-python3 <skill-directory>/scripts/create_pr_with_attribution.py -- --title "<title>" --base "<base>" --head "<head>"
+python3 <skill-directory>/scripts/create_pr_with_attribution.py --body-file <utf8-pr-body.md> -- --title "<title>" --base "<base>" --head "<head>"
 ```
 
-   On Windows, use `python` when `python3` is unavailable. The wrapper accepts PR URLs from GitHub.com and GitHub Enterprise hosts, appends `Generated with [Codex](https://chatgpt.com/codex)`, creates the PR with `gh pr create --body-file`, reads it back with `gh pr view`, repairs it once with `gh pr edit` if needed, and fails unless the footer is the final non-empty line.
+   On Windows, use `python` when `python3` is unavailable. Never pipe a non-ASCII PR body through Windows PowerShell 5.1: its default external-pipeline encoding replaces unsupported characters before Python can read them. The wrapper reads UTF-8 with or without a BOM, accepts PR URLs from GitHub.com and GitHub Enterprise hosts, appends `Generated with [Codex](https://chatgpt.com/codex)`, creates the PR with `gh pr create --body-file`, reads it back with `gh pr view`, repairs it once with `gh pr edit` if needed, and fails unless the complete body matches.
 8. Return the pull request URL printed by the wrapper.
 
 ## Boundaries
@@ -42,6 +43,7 @@ python3 <skill-directory>/scripts/create_pr_with_attribution.py -- --title "<tit
 - Complete commit-if-needed, push, and PR creation as one workflow; do not turn this into a push-only path.
 - A clean worktree is valid only for publishing existing branch commits. If `HEAD` has no commits outside the intended PR base, report that there is no PR content instead of creating an empty commit or empty PR.
 - Never call `gh pr create` directly or substitute another PR creation path; the bundled wrapper is required so the body attribution cannot be skipped.
+- Never pass the PR body through a PowerShell pipeline on Windows; use the wrapper's UTF-8 `--body-file` input.
 - Never guess, hard-code, or retain a stale model slug or reasoning effort.
 - Create a new branch automatically only when the current branch is `main`; do not add other policy-driven branch transitions to the original workflow.
 - Never force push, stage obvious secrets, or perform unrelated work.
