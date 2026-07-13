@@ -34,6 +34,7 @@ codex plugin add commit-commands@zaunekko
 
 ```text
 Generated with [Codex](https://chatgpt.com/codex)
+
 Model: <active-model-slug> <active-reasoning-effort>
 
 Co-authored-by: Codex <noreply@openai.com>
@@ -47,7 +48,7 @@ push や PR 作成は行わず、変更がない場合は空 commit も作成し
 
 現在の status、diff、branch、および対象 base との差分 commit を確認します。worktree に変更がある場合は、現在のブランチが正確に `main` のときだけ新しいブランチを作り、モデル attribution 付きの commit を 1 つ作成します。worktree が clean でも対象 base にない既存 commit がある場合は、その commit をそのまま公開します。どちらも `origin` へ push します。
 
-skill は `gh pr create` を直接呼び出しません。完全な PR body を同梱の `scripts/create_pr_with_attribution.py` wrapper に渡します。wrapper は GitHub.com と GitHub Enterprise の PR URL を受け入れ、footer を追加し、`--body-file` で PR を作成して body を再取得し、必要なら一度修復します。最後の空でない行が次の文字列だと確認できた場合だけ URL を返します。
+skill は `gh pr create` を直接呼び出しません。完全な PR body を UTF-8 の一時 Markdown ファイルへ保存し、同梱の `scripts/create_pr_with_attribution.py` wrapper 自身の `--body-file` オプションで渡します。これにより Windows PowerShell 5.1 の既定 ASCII 外部パイプによる非 ASCII 文字の破損を避けます。wrapper は GitHub.com と GitHub Enterprise の PR URL を受け入れ、footer を追加し、`gh pr create --body-file` で PR を作成して完全な body を再取得し、必要なら一度修復します。完全な body が一致した場合だけ URL を返します。
 
 ```text
 Generated with [Codex](https://chatgpt.com/codex)
