@@ -1,6 +1,6 @@
 {
   "name": "commit-commands",
-  "version": "1.0.0+codex.20260711125215",
+  "version": "1.0.0+codex.20260713020212",
   "description": "Codex-native commit and PR workflows with verified attribution.",
   "author": {
     "name": "ZaunEkko"
