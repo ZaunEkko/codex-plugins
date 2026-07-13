@@ -22,6 +22,7 @@ Inspects `git status`, `git diff HEAD`, the current branch, and the latest ten c
 
 ```text
 Generated with [Codex](https://chatgpt.com/codex)
+
 Model: <active-model-slug> <active-reasoning-effort>
 
 Co-authored-by: Codex <noreply@openai.com>
@@ -39,7 +40,7 @@ The skill never calls `gh pr create` directly. It passes the complete PR body to
 Generated with [Codex](https://chatgpt.com/codex)
 ```
 
-The wrapper accepts PR URLs from GitHub.com and GitHub Enterprise hosts, creates the PR through `--body-file`, reads the created body back, repairs it once if needed, and returns the URL only after verifying the exact final non-empty line. This skill requires explicit PR intent; use `$commit-push-pr` explicitly when this exact attributed PR workflow must run. A commit-and-push-only request does not authorize PR creation, and the skill does not create policy-driven branches for names other than `main`.
+The skill saves the complete PR body as a temporary UTF-8 Markdown file and passes it through the wrapper's `--body-file` option, avoiding Windows PowerShell 5.1's ASCII external-pipeline conversion. The wrapper accepts PR URLs from GitHub.com and GitHub Enterprise hosts, creates the PR through `gh pr create --body-file`, reads the created body back, repairs it once if needed, and returns the URL only after verifying the complete body. This skill requires explicit PR intent; use `$commit-push-pr` explicitly when this exact attributed PR workflow must run. A commit-and-push-only request does not authorize PR creation, and the skill does not create policy-driven branches for names other than `main`.
 
 ### `$clean-gone`
 

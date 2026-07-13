@@ -21,7 +21,7 @@
 | 플러그인 | 유형 | 설명 | 문서 |
 |----------|------|------|------|
 | explanatory-output-style | Plugin + SessionStart Hook | Claude Code 공식 explanatory-output-style 경험을 Codex에 맞게 적용합니다. | [플러그인 문서](docs/explanatory-output-style/README.md) |
-| commit-commands | Plugin + Skills + UserPromptSubmit Hook | commit 에 모델과 effort 를 기록하고 GitHub.com/GitHub Enterprise PR body 의 `Generated with [Codex](https://chatgpt.com/codex)` 를 검증하며 force 정리를 유지합니다. | [플러그인 문서](docs/commit-commands/README.md) |
+| commit-commands | Plugin + Skills + UserPromptSubmit Hook | commit 의 모델과 effort 를 분리된 문단으로 기록하고 GitHub.com/GitHub Enterprise PR body 를 UTF-8 파일로 안전하게 전달하여 `Generated with [Codex](https://chatgpt.com/codex)` 를 검증하며 force 정리를 유지합니다. | [플러그인 문서](docs/commit-commands/README.md) |
 
 ## 🚀 빠른 시작
 

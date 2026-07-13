@@ -2,7 +2,6 @@ import argparse
 import json
 import re
 import subprocess
-import sys
 import tempfile
 from pathlib import Path
 
@@ -29,6 +28,23 @@ def render_body(body):
 
     content = "\n".join(lines).rstrip()
     return f"{content}\n\n{FOOTER}\n" if content else f"{FOOTER}\n"
+
+
+def normalized_body(body):
+    return "\n".join(body.splitlines()).rstrip()
+
+
+def body_matches(actual, expected):
+    return normalized_body(actual) == normalized_body(expected)
+
+
+def read_body(body_file):
+    try:
+        return body_file.read_text(encoding="utf-8-sig")
+    except UnicodeDecodeError as error:
+        raise SystemExit("commit-commands: PR body file must be UTF-8") from error
+    except OSError as error:
+        raise SystemExit(f"commit-commands: cannot read PR body file: {error}") from error
 
 
 def run_gh(arguments):
@@ -87,13 +103,13 @@ def create_pull_request(body, gh_arguments):
         url = pull_request_url(result.stdout)
         pull_request = read_pull_request(url)
 
-        if final_nonempty_line(pull_request.get("body") or "") != FOOTER:
+        if not body_matches(pull_request.get("body") or "", rendered_body):
             run_gh(["pr", "edit", url, "--body-file", str(temporary_path)])
             pull_request = read_pull_request(url)
 
-        if final_nonempty_line(pull_request.get("body") or "") != FOOTER:
+        if not body_matches(pull_request.get("body") or "", rendered_body):
             raise SystemExit(
-                "commit-commands: pull request body is missing the required Codex attribution"
+                "commit-commands: pull request body does not match the expected UTF-8 content"
             )
 
         return pull_request.get("url") or url
@@ -105,6 +121,12 @@ def create_pull_request(body, gh_arguments):
 def parse_arguments(argv=None):
     parser = argparse.ArgumentParser(
         description="Create a pull request whose body ends with Codex attribution."
+    )
+    parser.add_argument(
+        "--body-file",
+        type=Path,
+        required=True,
+        help="read the pull request body from a UTF-8 Markdown file",
     )
     parser.add_argument("gh_arguments", nargs=argparse.REMAINDER)
     arguments = parser.parse_args(argv)
@@ -119,13 +141,15 @@ def parse_arguments(argv=None):
             or argument.startswith("--body=")
             or argument.startswith("--body-file=")
         ):
-            parser.error("pass the pull request body on stdin; do not supply --body or --body-file")
-    return gh_arguments
+            parser.error(
+                "use the wrapper's --body-file option; do not pass body options to gh"
+            )
+    return arguments.body_file, gh_arguments
 
 
 def main():
-    gh_arguments = parse_arguments()
-    print(create_pull_request(sys.stdin.read(), gh_arguments))
+    body_file, gh_arguments = parse_arguments()
+    print(create_pull_request(read_body(body_file), gh_arguments))
 
 
 if __name__ == "__main__":

@@ -20,6 +20,11 @@ SKILLS = {
     "clean-gone": PLUGIN_ROOT / "skills" / "clean-gone",
 }
 PR_WRAPPER = SKILLS["commit-push-pr"] / "scripts" / "create_pr_with_attribution.py"
+COMMIT_ATTRIBUTION = (
+    "Generated with [Codex](https://chatgpt.com/codex)\n\n"
+    "Model: <active-model-slug> <active-reasoning-effort>\n\n"
+    "Co-authored-by: Codex <noreply@openai.com>"
+)
 DOCUMENTATION = {
     "简体中文": ROOT / "docs" / "commit-commands" / "README.md",
     "English": ROOT / "i18n" / "en" / "docs" / "commit-commands" / "README.md",
@@ -254,11 +259,12 @@ class CommitCommandsPluginTests(unittest.TestCase):
         self.assertIn("Create exactly one commit", text)
         self.assertIn("Generated with [Codex](https://chatgpt.com/codex)", text)
         self.assertIn("Model: <active-model-slug> <active-reasoning-effort>", text)
+        self.assertIn(COMMIT_ATTRIBUTION, text)
         self.assertIn("commit-commands runtime metadata for this turn", text)
         self.assertIn("noreply@openai.com", text)
         self.assertIn("Do not push", text)
 
-    def test_commit_push_pr_publishes_new_or_existing_work_with_verified_footer(self):
+    def test_commit_push_pr_publishes_new_or_existing_work_with_verified_body(self):
         text = (SKILLS["commit-push-pr"] / "SKILL.md").read_text(encoding="utf-8")
         self.assertIn("current branch is exactly `main`", text)
         self.assertIn("git checkout -b <branch>", text)
@@ -271,8 +277,11 @@ class CommitCommandsPluginTests(unittest.TestCase):
         self.assertIn("gh pr create --body-file", text)
         self.assertIn("gh pr view", text)
         self.assertIn("gh pr edit", text)
+        self.assertIn("--body-file <utf8-pr-body.md>", text)
+        self.assertIn("PowerShell 5.1", text)
         self.assertGreaterEqual(text.count("Generated with [Codex](https://chatgpt.com/codex)"), 2)
         self.assertIn("Model: <active-model-slug> <active-reasoning-effort>", text)
+        self.assertIn(COMMIT_ATTRIBUTION, text)
         self.assertIn("commit-commands runtime metadata for this turn", text)
         self.assertIn("commit-and-push-only", text)
         self.assertIn("branch-publishing requests without explicit PR intent", text)
@@ -309,9 +318,41 @@ class CommitCommandsPluginTests(unittest.TestCase):
             with self.subTest(url=url):
                 self.assertEqual(wrapper.pull_request_url(f"Created pull request: {url}\n"), url)
 
+    def test_pr_wrapper_reads_non_ascii_utf8_body_file_with_optional_bom(self):
+        wrapper = self.load_pr_wrapper()
+        expected = "## 概要\n\n- 中文正文\n"
+
+        with tempfile.TemporaryDirectory() as directory:
+            body_file = Path(directory) / "body.md"
+            body_file.write_bytes(b"\xef\xbb\xbf" + expected.encode("utf-8"))
+            parsed_body_file, gh_arguments = wrapper.parse_arguments(
+                ["--body-file", str(body_file), "--", "--title", "发布说明"]
+            )
+
+            self.assertEqual(wrapper.read_body(parsed_body_file), expected)
+            self.assertEqual(gh_arguments, ["--title", "发布说明"])
+
+        with mock.patch.object(
+            wrapper.argparse.ArgumentParser,
+            "error",
+            side_effect=SystemExit,
+        ):
+            with self.assertRaises(SystemExit):
+                wrapper.parse_arguments(["--", "--title", "unsafe stdin"])
+
+    def test_pr_wrapper_detects_corrupted_body_even_when_footer_survives(self):
+        wrapper = self.load_pr_wrapper()
+        expected = wrapper.render_body("## 概要\n\n- 中文正文\n")
+        corrupted = f"## ??\n\n- ????\n\n{wrapper.FOOTER}\n"
+
+        self.assertEqual(wrapper.final_nonempty_line(corrupted), wrapper.FOOTER)
+        self.assertFalse(wrapper.body_matches(corrupted, expected))
+
     def test_pr_wrapper_repairs_and_verifies_created_pr_body(self):
         wrapper = self.load_pr_wrapper()
         url = "https://github.com/ZaunEkko/codex-plugins/pull/99"
+        source_body = "## 概要\n\n- 中文正文\n"
+        rendered_body = wrapper.render_body(source_body)
         completed = subprocess.CompletedProcess
         responses = [
             completed([], 0, stdout=f"{url}\n", stderr=""),
@@ -320,14 +361,14 @@ class CommitCommandsPluginTests(unittest.TestCase):
             completed(
                 [],
                 0,
-                stdout=json.dumps({"url": url, "body": f"## Summary\n\n{wrapper.FOOTER}\n"}),
+                stdout=json.dumps({"url": url, "body": rendered_body}),
                 stderr="",
             ),
         ]
 
         with mock.patch.object(wrapper.subprocess, "run", side_effect=responses) as run:
             created_url = wrapper.create_pull_request(
-                "## Summary\n",
+                source_body,
                 ["--title", "Test PR", "--base", "dev"],
             )
 
@@ -368,6 +409,9 @@ class CommitCommandsPluginTests(unittest.TestCase):
                 self.assertIn("create_pr_with_attribution.py", text)
                 self.assertIn("GitHub Enterprise", text)
                 self.assertIn("Model: <active-model-slug> <active-reasoning-effort>", text)
+                self.assertIn(COMMIT_ATTRIBUTION, text)
+                self.assertIn("UTF-8", text)
+                self.assertIn("PowerShell 5.1", text)
                 self.assertIn("/hooks", text)
                 self.assertIn("git branch -D", text)
                 self.assertNotIn("/clean_gone", text)
@@ -382,6 +426,13 @@ class CommitCommandsPluginTests(unittest.TestCase):
                 self.assertIn("Generated with [Codex](https://chatgpt.com/codex)", text)
                 self.assertIn("GitHub Enterprise", text)
                 self.assertIn("force", text.lower())
+                self.assertIn("UTF-8", text)
+
+    def test_plugin_readme_describes_unicode_safe_attribution(self):
+        text = (PLUGIN_ROOT / "README.md").read_text(encoding="utf-8")
+        self.assertIn(COMMIT_ATTRIBUTION, text)
+        self.assertIn("UTF-8", text)
+        self.assertIn("PowerShell 5.1", text)
 
 
 if __name__ == "__main__":
